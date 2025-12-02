@@ -19,7 +19,7 @@ cd mcp-jira-python
 pip install -e ".[dev]"
 ```
 
-## Tools Available (25 tools)
+## Tools Available (26 tools)
 
 ### Issue Management
 | Tool | Description |
@@ -61,6 +61,12 @@ pip install -e ".[dev]"
 | `list_link_types` | Get issue link types |
 | `get_field_mapping` | Discover custom fields by name |
 | `get_create_meta` | Get required fields for issue creation |
+
+### Quality & Guidance
+| Tool | Description |
+|------|-------------|
+| `audit_issue` | Audit issue for quality (AC, DoD, story points) |
+| `suggest_issue_fields` | Get field suggestions for issue creation |
 
 ### Utilities
 | Tool | Description |
