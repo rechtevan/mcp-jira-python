@@ -1,69 +1,87 @@
+"""Unit tests for AddCommentWithAttachmentTool."""
+
 import asyncio
-import unittest
+import tempfile
+from pathlib import Path
 from unittest.mock import Mock
+
+import pytest
 
 from mcp_jira_python.tools.add_comment_with_attachment import AddCommentWithAttachmentTool
 
 
-class TestAddCommentWithAttachmentTool(unittest.TestCase):
-    def setUp(self):
-        self.tool = AddCommentWithAttachmentTool()
-        self.mock_jira = Mock()
-        self.tool.jira = self.mock_jira
+@pytest.fixture
+def mock_attachment() -> Mock:
+    """Mock attachment."""
+    attachment = Mock()
+    attachment.id = "67890"
+    attachment.filename = "test.txt"
+    return attachment
 
-        # Test data
-        self.test_issue_key = "TEST-123"
-        self.test_comment = "Test comment with attachment"
-        self.test_file_content = b"Test file content"
-        self.test_file_name = "test.txt"
 
-        # Mock attachment
-        self.mock_attachment = Mock()
-        self.mock_attachment.id = "67890"
-        self.mock_attachment.filename = self.test_file_name
+@pytest.fixture
+def mock_comment() -> Mock:
+    """Mock comment."""
+    comment = Mock()
+    comment.id = "12345"
+    comment.body = "Test comment with attachment"
+    return comment
 
-        # Mock comment
-        self.mock_comment = Mock()
-        self.mock_comment.id = "12345"
-        self.mock_comment.body = self.test_comment
 
-    def test_execute_success(self):
-        """Test adding a comment with attachment successfully"""
-        # Setup mock responses
-        self.mock_jira.add_attachment.return_value = [self.mock_attachment]
-        self.mock_jira.add_comment.return_value = self.mock_comment
+@pytest.fixture
+def mock_jira(mock_attachment: Mock, mock_comment: Mock) -> Mock:
+    """Create mock Jira client."""
+    jira = Mock()
+    jira.add_attachment.return_value = [mock_attachment]
+    jira.add_comment.return_value = mock_comment
+    return jira
 
-        # Create a temporary test file
-        import tempfile
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as tmp:
+
+@pytest.fixture
+def tool(mock_jira: Mock) -> AddCommentWithAttachmentTool:
+    """Create tool with mock Jira."""
+    tool = AddCommentWithAttachmentTool()
+    tool.jira = mock_jira
+    return tool
+
+
+@pytest.mark.unit
+class TestAddCommentWithAttachmentTool:
+    """Tests for AddCommentWithAttachmentTool."""
+
+    def test_execute_success(self, tool: AddCommentWithAttachmentTool, mock_jira: Mock) -> None:
+        """Test adding a comment with attachment successfully."""
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp:
             tmp.write("Test file content")
-            tmp_path = tmp.name
+            tmp_path = Path(tmp.name)
 
         try:
-            # Test input matching the tool's expected structure
-            test_input = {
-                "issueKey": self.test_issue_key,
-                "comment": self.test_comment,
-                "filename": self.test_file_name,
-                "filepath": tmp_path
-            }
-
-            # Execute tool using asyncio.run
-            result = asyncio.run(self.tool.execute(test_input))
-
-            # Verify result
-            self.assertEqual(result[0].type, "text")
-            self.assertIn("12345", result[0].text)  # Comment ID
-            self.assertIn(self.test_file_name, result[0].text)  # File name should be in result
-
-            # Verify JIRA API calls
-            self.mock_jira.add_comment.assert_called_with(
-                self.test_issue_key,
-                self.test_comment
+            result = asyncio.run(
+                tool.execute(
+                    {
+                        "issueKey": "TEST-123",
+                        "comment": "Test comment with attachment",
+                        "filename": "test.txt",
+                        "filepath": str(tmp_path),
+                    }
+                )
             )
-            self.mock_jira.add_attachment.assert_called_once()
+
+            assert result[0].type == "text"
+            assert "12345" in result[0].text  # Comment ID
+            assert "test.txt" in result[0].text
+
+            mock_jira.add_comment.assert_called_with("TEST-123", "Test comment with attachment")
+            mock_jira.add_attachment.assert_called_once()
         finally:
-            # Clean up temp file
-            import os
-            if os.path.exists(tmp_path):
-                os.unlink(tmp_path)
+            if tmp_path.exists():
+                tmp_path.unlink()
+
+    def test_tool_definition(self, tool: AddCommentWithAttachmentTool) -> None:
+        """Test tool definition."""
+        definition = tool.get_tool_definition()
+        assert definition.name == "add_comment_with_attachment"
+        assert "issueKey" in definition.inputSchema["properties"]
+        assert "comment" in definition.inputSchema["properties"]
+        assert "filename" in definition.inputSchema["properties"]
+        assert "filepath" in definition.inputSchema["properties"]

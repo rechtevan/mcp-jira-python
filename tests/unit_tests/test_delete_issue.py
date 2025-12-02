@@ -47,13 +47,11 @@ class TestDeleteIssueTool:
         mock_jira.issue.assert_called_once_with("TEST-123")
         mock_issue.delete.assert_called_once()
 
-    def test_execute_nonexistent_issue(
-        self, tool: DeleteIssueTool, mock_jira: Mock
-    ) -> None:
+    def test_execute_nonexistent_issue(self, tool: DeleteIssueTool, mock_jira: Mock) -> None:
         """Test deleting a nonexistent issue raises error."""
         mock_jira.issue.side_effect = JIRAError(status_code=404)
 
-        with pytest.raises(Exception):
+        with pytest.raises((JIRAError, Exception)):
             asyncio.run(tool.execute({"issueKey": "TEST-123"}))
 
     def test_requires_issue_key(self, tool: DeleteIssueTool) -> None:

@@ -10,35 +10,22 @@ from mcp_jira_python.tools.search_my_issues import SearchMyIssuesTool
 
 
 @pytest.fixture
-def mock_issues() -> list[Mock]:
-    """Sample issues for current user."""
-    issues = []
-    for key, summary, status, issue_type in [
-        ("PROJ-101", "Implement login", "In Progress", "Story"),
-        ("PROJ-102", "Fix bug", "In Progress", "Bug"),
-        ("DEV-50", "Update docs", "Open", "Task"),
-    ]:
-        issue = Mock()
-        issue.key = key
-        issue.fields = Mock()
-        issue.fields.summary = summary
-        issue.fields.status = Mock()
-        issue.fields.status.__str__ = lambda self, s=status: s
-        issue.fields.issuetype = Mock()
-        issue.fields.issuetype.__str__ = lambda self, t=issue_type: t
-        issue.fields.priority = Mock()
-        issue.fields.priority.__str__ = lambda self: "Medium"
-        issue.fields.project = Mock()
-        issue.fields.project.key = key.split("-")[0]
-        issues.append(issue)
-    return issues
+def mock_issue() -> Mock:
+    """Create a mock issue."""
+    issue = Mock()
+    issue.key = "PROJ-123"
+    issue.fields.summary = "Test issue"
+    issue.fields.status = Mock(__str__=lambda s: "In Progress")
+    issue.fields.issuetype = Mock(__str__=lambda s: "Story")
+    issue.fields.project.key = "PROJ"
+    return issue
 
 
 @pytest.fixture
-def mock_jira(mock_issues: list[Mock]) -> Mock:
+def mock_jira(mock_issue: Mock) -> Mock:
     """Create mock Jira client."""
     jira = Mock()
-    jira.search_issues.return_value = mock_issues
+    jira.search_issues.return_value = [mock_issue]
     return jira
 
 
@@ -51,64 +38,102 @@ def tool(mock_jira: Mock) -> SearchMyIssuesTool:
 
 
 @pytest.mark.unit
-class TestSearchMyIssues:
+class TestSearchMyIssuesTool:
     """Tests for SearchMyIssuesTool."""
 
-    def test_returns_issues(self, tool: SearchMyIssuesTool) -> None:
-        """Test that issues are returned."""
+    def test_execute_default(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
+        """Test default search (assignee, in_progress)."""
         result = asyncio.run(tool.execute({}))
 
+        assert result[0].type == "text"
         data = json.loads(result[0].text)
-        assert data["count"] == 3
-        assert len(data["issues"]) == 3
 
-    def test_issue_includes_commit_format(self, tool: SearchMyIssuesTool) -> None:
-        """Test that issues include commit format hint."""
-        result = asyncio.run(tool.execute({}))
-
-        data = json.loads(result[0].text)
-        issue = data["issues"][0]
-        assert issue["commitFormat"] == "PROJ-101: "
-
-    def test_includes_hint(self, tool: SearchMyIssuesTool) -> None:
-        """Test that result includes helpful hint."""
-        result = asyncio.run(tool.execute({}))
-
-        data = json.loads(result[0].text)
+        assert data["count"] == 1
+        assert len(data["issues"]) == 1
+        assert data["issues"][0]["key"] == "PROJ-123"
+        assert data["statusFilter"] == "in_progress"
+        assert data["roleFilter"] == "assignee"
         assert "hint" in data
-        assert "git commit" in data["hint"]
 
-    def test_default_assignee_filter(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
-        """Test that default role filter is assignee."""
-        _ = asyncio.run(tool.execute({}))
+        # Verify JQL contains assignee
+        call_args = mock_jira.search_issues.call_args
+        assert "assignee = currentUser()" in call_args[0][0]
+
+    def test_execute_with_project(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
+        """Test search with project filter."""
+        result = asyncio.run(tool.execute({"projectKey": "PROJ"}))
+
+        data = json.loads(result[0].text)
+        assert data["projectFilter"] == "PROJ"
+
+        call_args = mock_jira.search_issues.call_args
+        assert "project = PROJ" in call_args[0][0]
+
+    def test_execute_role_reporter(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
+        """Test search by reporter role."""
+        result = asyncio.run(tool.execute({"role": "reporter"}))
+
+        data = json.loads(result[0].text)
+        assert data["roleFilter"] == "reporter"
+
+        call_args = mock_jira.search_issues.call_args
+        assert "reporter = currentUser()" in call_args[0][0]
+
+    def test_execute_role_watcher(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
+        """Test search by watcher role."""
+        result = asyncio.run(tool.execute({"role": "watcher"}))
+
+        data = json.loads(result[0].text)
+        assert data["roleFilter"] == "watcher"
+
+        call_args = mock_jira.search_issues.call_args
+        assert "watcher = currentUser()" in call_args[0][0]
+
+    def test_execute_role_any(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
+        """Test search by any role."""
+        result = asyncio.run(tool.execute({"role": "any"}))
+
+        data = json.loads(result[0].text)
+        assert data["roleFilter"] == "any"
 
         call_args = mock_jira.search_issues.call_args
         jql = call_args[0][0]
         assert "assignee = currentUser()" in jql
-
-    def test_default_in_progress_filter(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
-        """Test that default status filter is in_progress."""
-        _ = asyncio.run(tool.execute({}))
-
-        call_args = mock_jira.search_issues.call_args
-        jql = call_args[0][0]
-        assert "In Progress" in jql
-
-    def test_project_filter(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
-        """Test filtering by project."""
-        _ = asyncio.run(tool.execute({"projectKey": "PROJ"}))
-
-        call_args = mock_jira.search_issues.call_args
-        jql = call_args[0][0]
-        assert "project = PROJ" in jql
-
-    def test_reporter_role(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
-        """Test filtering by reporter role."""
-        _ = asyncio.run(tool.execute({"role": "reporter"}))
-
-        call_args = mock_jira.search_issues.call_args
-        jql = call_args[0][0]
         assert "reporter = currentUser()" in jql
+        assert "watcher = currentUser()" in jql
+
+    def test_execute_status_open(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
+        """Test search with open status filter."""
+        result = asyncio.run(tool.execute({"status": "open"}))
+
+        data = json.loads(result[0].text)
+        assert data["statusFilter"] == "open"
+
+        call_args = mock_jira.search_issues.call_args
+        assert "status != Done" in call_args[0][0]
+
+    def test_execute_status_all(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
+        """Test search with all status filter."""
+        result = asyncio.run(tool.execute({"status": "all"}))
+
+        data = json.loads(result[0].text)
+        assert data["statusFilter"] == "all"
+
+    def test_execute_no_results(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
+        """Test search with no results."""
+        mock_jira.search_issues.return_value = []
+        result = asyncio.run(tool.execute({}))
+
+        data = json.loads(result[0].text)
+        assert data["count"] == 0
+        assert "hint" not in data
+
+    def test_execute_error(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
+        """Test error handling."""
+        mock_jira.search_issues.side_effect = Exception("API error")
+
+        with pytest.raises(Exception, match="Failed to search issues"):
+            asyncio.run(tool.execute({}))
 
     def test_tool_definition(self, tool: SearchMyIssuesTool) -> None:
         """Test tool definition."""

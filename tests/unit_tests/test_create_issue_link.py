@@ -29,16 +29,16 @@ def tool(mock_jira: Mock) -> CreateIssueLinkTool:
 class TestCreateIssueLinkTool:
     """Tests for CreateIssueLinkTool."""
 
-    def test_execute_creates_link(
-        self, tool: CreateIssueLinkTool, mock_jira: Mock
-    ) -> None:
+    def test_execute_creates_link(self, tool: CreateIssueLinkTool, mock_jira: Mock) -> None:
         """Test creating an issue link."""
         result = asyncio.run(
-            tool.execute({
-                "inwardIssueKey": "TEST-123",
-                "outwardIssueKey": "TEST-456",
-                "linkType": "Relates",
-            })
+            tool.execute(
+                {
+                    "inwardIssueKey": "TEST-123",
+                    "outwardIssueKey": "TEST-456",
+                    "linkType": "Relates",
+                }
+            )
         )
 
         data = json.loads(result[0].text)
@@ -57,30 +57,36 @@ class TestCreateIssueLinkTool:
         """Test that inwardIssueKey is required."""
         with pytest.raises(ValueError):
             asyncio.run(
-                tool.execute({
-                    "outwardIssueKey": "TEST-456",
-                    "linkType": "Relates",
-                })
+                tool.execute(
+                    {
+                        "outwardIssueKey": "TEST-456",
+                        "linkType": "Relates",
+                    }
+                )
             )
 
     def test_requires_outward_issue(self, tool: CreateIssueLinkTool) -> None:
         """Test that outwardIssueKey is required."""
         with pytest.raises(ValueError):
             asyncio.run(
-                tool.execute({
-                    "inwardIssueKey": "TEST-123",
-                    "linkType": "Relates",
-                })
+                tool.execute(
+                    {
+                        "inwardIssueKey": "TEST-123",
+                        "linkType": "Relates",
+                    }
+                )
             )
 
     def test_requires_link_type(self, tool: CreateIssueLinkTool) -> None:
         """Test that linkType is required."""
         with pytest.raises(ValueError):
             asyncio.run(
-                tool.execute({
-                    "inwardIssueKey": "TEST-123",
-                    "outwardIssueKey": "TEST-456",
-                })
+                tool.execute(
+                    {
+                        "inwardIssueKey": "TEST-123",
+                        "outwardIssueKey": "TEST-456",
+                    }
+                )
             )
 
     def test_tool_definition(self, tool: CreateIssueLinkTool) -> None:
