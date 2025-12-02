@@ -25,10 +25,7 @@ class TestAddCommentTool(unittest.TestCase):
         self.mock_jira.add_comment.return_value = mock_comment
 
         # Test input
-        test_input = {
-            "issueKey": self.test_issue_key,
-            "comment": "Test comment"
-        }
+        test_input = {"issueKey": self.test_issue_key, "comment": "Test comment"}
 
         # Execute tool using asyncio.run to handle the coroutine
         result = asyncio.run(self.tool.execute(test_input))
@@ -38,7 +35,4 @@ class TestAddCommentTool(unittest.TestCase):
         self.assertIn("12345", result[0].text)
 
         # Verify JIRA API call
-        self.mock_jira.add_comment.assert_called_with(
-            self.test_issue_key,
-            "Test comment"
-        )
+        self.mock_jira.add_comment.assert_called_with(self.test_issue_key, "Test comment")

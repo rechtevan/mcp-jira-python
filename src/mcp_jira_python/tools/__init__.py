@@ -8,6 +8,7 @@ from .base import BaseTool
 from .create_issue import CreateIssueTool
 from .create_issue_link import CreateIssueLinkTool
 from .delete_issue import DeleteIssueTool
+from .get_field_mapping import GetFieldMappingTool
 from .get_issue import GetIssueTool
 from .get_issue_attachment import GetIssueAttachmentTool
 from .get_user import GetUserTool
@@ -33,6 +34,7 @@ _TOOLS: dict[str, BaseTool] = {
     "add_comment_with_attachment": AddCommentWithAttachmentTool(),
     "attach_file": AttachFileTool(),
     "attach_content": AttachContentTool(),
+    "get_field_mapping": GetFieldMappingTool(),
 }
 
 

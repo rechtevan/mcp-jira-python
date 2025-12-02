@@ -28,7 +28,7 @@ class TestUpdateIssueTool(unittest.TestCase):
         test_input = {
             "issueKey": self.test_issue_key,
             "summary": self.test_summary,
-            "description": self.test_description
+            "description": self.test_description,
         }
 
         # Execute tool using asyncio.run
@@ -41,7 +41,6 @@ class TestUpdateIssueTool(unittest.TestCase):
 
         # Verify JIRA API calls
         self.mock_jira.issue.assert_called_once_with(self.test_issue_key)
-        self.mock_issue.update.assert_called_once_with(fields={
-            "summary": self.test_summary,
-            "description": self.test_description
-        })
+        self.mock_issue.update.assert_called_once_with(
+            fields={"summary": self.test_summary, "description": self.test_description}
+        )

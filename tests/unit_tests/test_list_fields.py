@@ -13,24 +13,19 @@ class TestListFieldsTool(unittest.TestCase):
 
         # Mock fields data
         self.mock_fields = [
-            {
-                "id": "summary",
-                "name": "Summary",
-                "custom": False,
-                "schema": {"type": "string"}
-            },
+            {"id": "summary", "name": "Summary", "custom": False, "schema": {"type": "string"}},
             {
                 "id": "description",
                 "name": "Description",
                 "custom": False,
-                "schema": {"type": "string"}
+                "schema": {"type": "string"},
             },
             {
                 "id": "customfield_10001",
                 "name": "Custom Field",
                 "custom": True,
-                "schema": {"type": "string"}
-            }
+                "schema": {"type": "string"},
+            },
         ]
 
     def test_execute_success(self):
@@ -80,13 +75,7 @@ class TestListFieldsTool(unittest.TestCase):
     def test_execute_fields_without_schema(self):
         """Test handling fields without schema"""
         # Mock fields without schema
-        fields_no_schema = [
-            {
-                "id": "field1",
-                "name": "Field 1",
-                "custom": False
-            }
-        ]
+        fields_no_schema = [{"id": "field1", "name": "Field 1", "custom": False}]
         self.mock_jira.fields.return_value = fields_no_schema
 
         # Test input

@@ -31,10 +31,7 @@ class TestSearchIssuesTool(unittest.TestCase):
         self.mock_jira.search_issues.return_value = [self.mock_issue]
 
         # Test input
-        test_input = {
-            "projectKey": self.test_project_key,
-            "jql": 'status = "Open"'
-        }
+        test_input = {"projectKey": self.test_project_key, "jql": 'status = "Open"'}
 
         # Execute tool
         result = asyncio.run(self.tool.execute(test_input))
@@ -49,7 +46,7 @@ class TestSearchIssuesTool(unittest.TestCase):
         self.mock_jira.search_issues.assert_called_once_with(
             expected_jql,
             maxResults=30,
-            fields="summary,description,status,priority,assignee,issuetype"
+            fields="summary,description,status,priority,assignee,issuetype",
         )
 
     def test_execute_complex_jql(self):
@@ -60,7 +57,7 @@ class TestSearchIssuesTool(unittest.TestCase):
         # Test input with complex JQL
         test_input = {
             "projectKey": self.test_project_key,
-            "jql": 'status = "Open" AND assignee = currentUser() AND updated >= "-1w"'
+            "jql": 'status = "Open" AND assignee = currentUser() AND updated >= "-1w"',
         }
 
         # Execute tool
@@ -72,11 +69,11 @@ class TestSearchIssuesTool(unittest.TestCase):
 
         # Verify complex JQL
         expected_jql = (
-            f'project = {self.test_project_key} AND '
+            f"project = {self.test_project_key} AND "
             'status = "Open" AND assignee = currentUser() AND updated >= "-1w"'
         )
         self.mock_jira.search_issues.assert_called_once_with(
             expected_jql,
             maxResults=30,
-            fields="summary,description,status,priority,assignee,issuetype"
+            fields="summary,description,status,priority,assignee,issuetype",
         )

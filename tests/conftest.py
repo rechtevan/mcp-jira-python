@@ -172,9 +172,11 @@ def sample_comment_data() -> dict[str, str]:
 
 
 @pytest.fixture
-def jira_client(requires_jira: None, jira_credentials: dict[str, str | None]) -> Generator[Any, None, None]:
+def jira_client(
+    requires_jira: None, jira_credentials: dict[str, str | None]
+) -> Generator[Any, None, None]:
     """Create a real Jira client for integration tests."""
-    from jira import JIRA
+    from jira import JIRA  # noqa: PLC0415
 
     host = jira_credentials["host"]
     if not host:

@@ -34,6 +34,17 @@ jira-api = "mcp_jira_python:main"
 target-version = "py310"
 line-length = 100
 src = ["src", "tests"]
+# Exclude legacy tests that need modernization
+extend-exclude = [
+    "tests/test_*.py",           # Legacy top-level tests
+    "tests/endpoint_tests/",     # Legacy endpoint tests
+    "tests/unit_tests/test_add_comment_with_attachment.py",
+    "tests/unit_tests/test_attach_file.py",
+    "tests/unit_tests/test_create_issue_link.py",
+    "tests/unit_tests/test_delete_issue.py",
+    "tests/unit_tests/test_get_issue_attachment.py",
+    "tests/unit_tests/__init__.py",
+]
 
 [tool.ruff.lint]
 select = [

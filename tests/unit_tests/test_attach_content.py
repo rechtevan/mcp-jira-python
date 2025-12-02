@@ -27,7 +27,7 @@ class TestAttachContentTool(unittest.TestCase):
             "issueKey": self.test_issue_key,
             "filename": self.test_filename,
             "content": self.test_content,
-            "encoding": "none"
+            "encoding": "none",
         }
 
         # Execute
@@ -50,14 +50,14 @@ class TestAttachContentTool(unittest.TestCase):
         self.mock_jira.add_attachment.return_value = None
 
         # Encode content as base64
-        encoded_content = base64.b64encode(self.test_content.encode('utf-8')).decode('utf-8')
+        encoded_content = base64.b64encode(self.test_content.encode("utf-8")).decode("utf-8")
 
         # Test input
         test_input = {
             "issueKey": self.test_issue_key,
             "filename": self.test_filename,
             "content": encoded_content,
-            "encoding": "base64"
+            "encoding": "base64",
         }
 
         # Execute
@@ -74,7 +74,7 @@ class TestAttachContentTool(unittest.TestCase):
         """Test error handling for missing required fields"""
         test_input = {
             "issueKey": self.test_issue_key,
-            "filename": self.test_filename
+            "filename": self.test_filename,
             # Missing content
         }
 
@@ -93,7 +93,7 @@ class TestAttachContentTool(unittest.TestCase):
             "issueKey": self.test_issue_key,
             "filename": self.test_filename,
             "content": "not-valid-base64!!!",
-            "encoding": "base64"
+            "encoding": "base64",
         }
 
         # ValueError gets wrapped in Exception by the tool

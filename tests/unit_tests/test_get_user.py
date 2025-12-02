@@ -27,9 +27,7 @@ class TestGetUserTool(unittest.TestCase):
         self.mock_jira.search_users.return_value = [self.mock_user]
 
         # Test input
-        test_input = {
-            "email": self.test_email
-        }
+        test_input = {"email": self.test_email}
 
         # Execute
         result = asyncio.run(self.tool.execute(test_input))
@@ -57,9 +55,7 @@ class TestGetUserTool(unittest.TestCase):
         # Setup mock to return empty list
         self.mock_jira.search_users.return_value = []
 
-        test_input = {
-            "email": "nonexistent@example.com"
-        }
+        test_input = {"email": "nonexistent@example.com"}
 
         with self.assertRaises(ValueError) as context:
             asyncio.run(self.tool.execute(test_input))

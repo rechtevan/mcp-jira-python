@@ -48,9 +48,7 @@ class TestGetIssueTool(unittest.TestCase):
         self.mock_jira.issue.return_value = self.mock_issue
 
         # Test input
-        test_input = {
-            "issueKey": self.test_issue_key
-        }
+        test_input = {"issueKey": self.test_issue_key}
 
         # Execute tool using asyncio.run
         result = asyncio.run(self.tool.execute(test_input))
@@ -65,6 +63,5 @@ class TestGetIssueTool(unittest.TestCase):
 
         # Verify JIRA API call
         self.mock_jira.issue.assert_called_once_with(
-            self.test_issue_key,
-            expand='comments,attachments'
+            self.test_issue_key, expand="comments,attachments"
         )

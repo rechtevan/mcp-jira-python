@@ -58,19 +58,23 @@ class TestMCPServerWithJira:
 
     @pytest.mark.asyncio
     async def test_get_issue_flow(
-        self, jira_client: "JIRA", test_project_key: str  # noqa: F821
+        self,
+        jira_client: "JIRA",  # noqa: F821
+        test_project_key: str,
     ) -> None:
         """Test the complete get_issue flow with real Jira."""
-        from mcp_jira_python.tools.search_issues import SearchIssuesTool
+        from mcp_jira_python.tools.search_issues import SearchIssuesTool  # noqa: PLC0415
 
         # First, search for an issue to get a valid key
         search_tool = SearchIssuesTool()
         search_tool.jira = jira_client
 
-        result = await search_tool.execute({
-            "projectKey": test_project_key,
-            "jql": "ORDER BY updated DESC",
-        })
+        result = await search_tool.execute(
+            {
+                "projectKey": test_project_key,
+                "jql": "status != null ORDER BY updated DESC",
+            }
+        )
 
         assert len(result) > 0
         assert result[0].type == "text"
@@ -78,7 +82,7 @@ class TestMCPServerWithJira:
     @pytest.mark.asyncio
     async def test_list_fields_flow(self, jira_client: "JIRA") -> None:  # noqa: F821
         """Test listing Jira fields."""
-        from mcp_jira_python.tools.list_fields import ListFieldsTool
+        from mcp_jira_python.tools.list_fields import ListFieldsTool  # noqa: PLC0415
 
         tool = ListFieldsTool()
         tool.jira = jira_client
@@ -94,7 +98,7 @@ class TestMCPServerWithJira:
     @pytest.mark.asyncio
     async def test_list_issue_types_flow(self, jira_client: "JIRA") -> None:  # noqa: F821
         """Test listing issue types."""
-        from mcp_jira_python.tools.list_issue_types import ListIssueTypesTool
+        from mcp_jira_python.tools.list_issue_types import ListIssueTypesTool  # noqa: PLC0415
 
         tool = ListIssueTypesTool()
         tool.jira = jira_client
@@ -103,4 +107,3 @@ class TestMCPServerWithJira:
 
         assert len(result) > 0
         assert result[0].type == "text"
-

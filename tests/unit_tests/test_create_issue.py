@@ -31,7 +31,7 @@ class TestCreateIssueTool(unittest.TestCase):
             "projectKey": self.test_project_key,
             "summary": self.test_summary,
             "description": self.test_description,
-            "issueType": "Task"
+            "issueType": "Task",
         }
 
         # Execute tool using asyncio.run
@@ -43,9 +43,9 @@ class TestCreateIssueTool(unittest.TestCase):
 
         # Verify JIRA API call - now with correct field structure
         expected_fields = {
-            'project': {'key': self.test_project_key},
-            'summary': self.test_summary,
-            'description': self.test_description,
-            'issuetype': {'name': 'Task'}
+            "project": {"key": self.test_project_key},
+            "summary": self.test_summary,
+            "description": self.test_description,
+            "issuetype": {"name": "Task"},
         }
         self.mock_jira.create_issue.assert_called_once_with(fields=expected_fields)

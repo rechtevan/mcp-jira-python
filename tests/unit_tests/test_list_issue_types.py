@@ -36,7 +36,7 @@ class TestListIssueTypesTool(unittest.TestCase):
         self.mock_jira.issue_types.return_value = [
             self.mock_issue_type1,
             self.mock_issue_type2,
-            self.mock_issue_type3
+            self.mock_issue_type3,
         ]
 
         # Test input (no arguments required)

@@ -36,7 +36,7 @@ class TestListLinkTypesTool(unittest.TestCase):
         self.mock_jira.issue_link_types.return_value = [
             self.mock_link_type1,
             self.mock_link_type2,
-            self.mock_link_type3
+            self.mock_link_type3,
         ]
 
         # Test input (no arguments required)
