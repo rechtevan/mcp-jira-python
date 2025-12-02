@@ -77,9 +77,7 @@ class GetCreateMetaTool(BaseTool):
         if allowed_values and len(allowed_values) <= 20:
             # Only include if reasonable number
             info["allowedValues"] = [
-                v.get("name", v.get("value", str(v)))
-                for v in allowed_values
-                if isinstance(v, dict)
+                v.get("name", v.get("value", str(v))) for v in allowed_values if isinstance(v, dict)
             ]
 
         return info
@@ -142,13 +140,15 @@ class GetCreateMetaTool(BaseTool):
                 required_fields.sort(key=lambda x: x["name"])
                 optional_fields.sort(key=lambda x: x["name"])
 
-                result_types.append({
-                    "name": issue_type.get("name"),
-                    "description": issue_type.get("description", ""),
-                    "requiredFields": required_fields,
-                    "optionalFields": optional_fields[:15],  # Limit optional to top 15
-                    "totalOptionalFields": len(optional_fields),
-                })
+                result_types.append(
+                    {
+                        "name": issue_type.get("name"),
+                        "description": issue_type.get("description", ""),
+                        "requiredFields": required_fields,
+                        "optionalFields": optional_fields[:15],  # Limit optional to top 15
+                        "totalOptionalFields": len(optional_fields),
+                    }
+                )
 
             result = {
                 "projectKey": project_key,
@@ -167,4 +167,3 @@ class GetCreateMetaTool(BaseTool):
             raise
         except Exception as e:
             raise Exception(f"Failed to get create metadata: {e!s}") from e
-

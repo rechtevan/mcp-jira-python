@@ -61,10 +61,12 @@ class GetTransitionsTool(BaseTool):
                     required_fields = []
                     for field_id, field_info in transition_fields.items():
                         if field_info.get("required", False):
-                            required_fields.append({
-                                "id": field_id,
-                                "name": field_info.get("name", field_id),
-                            })
+                            required_fields.append(
+                                {
+                                    "id": field_id,
+                                    "name": field_info.get("name", field_id),
+                                }
+                            )
                     if required_fields:
                         transition_info["requiredFields"] = required_fields
 
@@ -85,4 +87,3 @@ class GetTransitionsTool(BaseTool):
 
         except Exception as e:
             raise Exception(f"Failed to get transitions: {e!s}") from e
-

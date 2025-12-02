@@ -1,53 +1,68 @@
+"""Unit tests for DeleteIssueTool."""
+
 import asyncio
-import unittest
 from unittest.mock import Mock
 
+import pytest
 from jira.exceptions import JIRAError
 
 from mcp_jira_python.tools.delete_issue import DeleteIssueTool
 
 
-class TestDeleteIssueTool(unittest.TestCase):
-    def setUp(self):
-        self.tool = DeleteIssueTool()
-        self.mock_jira = Mock()
-        self.tool.jira = self.mock_jira
+@pytest.fixture
+def mock_issue() -> Mock:
+    """Mock issue."""
+    return Mock()
 
-        # Test data
-        self.test_issue_key = "TEST-123"
 
-        # Mock issue
-        self.mock_issue = Mock()
-        self.mock_jira.issue.return_value = self.mock_issue
+@pytest.fixture
+def mock_jira(mock_issue: Mock) -> Mock:
+    """Create mock Jira client."""
+    jira = Mock()
+    jira.issue.return_value = mock_issue
+    return jira
 
-    def test_execute(self):
-        """Test deleting an issue"""
-        # Test input
-        test_input = {
-            "issueKey": self.test_issue_key
-        }
 
-        # Execute tool using asyncio.run
-        result = asyncio.run(self.tool.execute(test_input))
+@pytest.fixture
+def tool(mock_jira: Mock) -> DeleteIssueTool:
+    """Create tool with mock Jira."""
+    tool = DeleteIssueTool()
+    tool.jira = mock_jira
+    return tool
 
-        # Verify result
-        self.assertEqual(result[0].type, "text")
-        self.assertIn(self.test_issue_key, result[0].text)
 
-        # Verify JIRA API calls
-        self.mock_jira.issue.assert_called_once_with(self.test_issue_key)
-        self.mock_issue.delete.assert_called_once()
+@pytest.mark.unit
+class TestDeleteIssueTool:
+    """Tests for DeleteIssueTool."""
 
-    def test_execute_nonexistent_issue(self):
-        """Test deleting a nonexistent issue"""
-        # Mock JIRA to raise exception for nonexistent issue
-        self.mock_jira.issue.side_effect = JIRAError(status_code=404)
+    def test_execute_deletes_issue(
+        self, tool: DeleteIssueTool, mock_jira: Mock, mock_issue: Mock
+    ) -> None:
+        """Test deleting an issue."""
+        result = asyncio.run(tool.execute({"issueKey": "TEST-123"}))
 
-        # Test input
-        test_input = {
-            "issueKey": self.test_issue_key
-        }
+        assert result[0].type == "text"
+        assert "TEST-123" in result[0].text
 
-        # Execute tool and verify exception
-        with self.assertRaises(Exception):
-            asyncio.run(self.tool.execute(test_input))
+        mock_jira.issue.assert_called_once_with("TEST-123")
+        mock_issue.delete.assert_called_once()
+
+    def test_execute_nonexistent_issue(
+        self, tool: DeleteIssueTool, mock_jira: Mock
+    ) -> None:
+        """Test deleting a nonexistent issue raises error."""
+        mock_jira.issue.side_effect = JIRAError(status_code=404)
+
+        with pytest.raises(Exception):
+            asyncio.run(tool.execute({"issueKey": "TEST-123"}))
+
+    def test_requires_issue_key(self, tool: DeleteIssueTool) -> None:
+        """Test that issueKey is required."""
+        with pytest.raises(ValueError, match="issueKey is required"):
+            asyncio.run(tool.execute({}))
+
+    def test_tool_definition(self, tool: DeleteIssueTool) -> None:
+        """Test tool definition."""
+        definition = tool.get_tool_definition()
+        assert definition.name == "delete_issue"
+        assert "issueKey" in definition.inputSchema["properties"]

@@ -1,20 +1,12 @@
 """Tool for retrieving Jira issue details including custom fields."""
 
-import io
 import json
-import sys
 from typing import Any
 
 from mcp.types import TextContent, Tool
 
 from ..field_mapper import FieldMapper
 from .base import BaseTool
-
-# Force UTF-8 encoding for stdout on Windows
-# This is critical for emoji output on Windows systems
-if sys.platform.startswith("win"):
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 
 
 class GetIssueTool(BaseTool):

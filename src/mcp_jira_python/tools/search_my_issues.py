@@ -128,8 +128,7 @@ class SearchMyIssuesTool(BaseTool):
             # Add helpful hint
             if issue_list:
                 result["hint"] = (
-                    "Use issue key in commit: "
-                    f"git commit -m \"{issue_list[0]['key']}: your message\""
+                    f'Use issue key in commit: git commit -m "{issue_list[0]["key"]}: your message"'
                 )
 
             return [
@@ -141,4 +140,3 @@ class SearchMyIssuesTool(BaseTool):
 
         except Exception as e:
             raise Exception(f"Failed to search issues: {e!s}") from e
-

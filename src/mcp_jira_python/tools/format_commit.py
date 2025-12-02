@@ -85,10 +85,7 @@ class FormatCommitTool(BaseTool):
 
         # Validate issue key format
         if not self._validate_issue_key(issue_key):
-            raise ValueError(
-                f"Invalid issue key format: {issue_key}. "
-                "Expected format: PROJ-123"
-            )
+            raise ValueError(f"Invalid issue key format: {issue_key}. Expected format: PROJ-123")
 
         issue_summary = None
         issue_type = None
@@ -137,4 +134,3 @@ class FormatCommitTool(BaseTool):
                 text=json.dumps(result, indent=2, ensure_ascii=False),
             )
         ]
-

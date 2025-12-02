@@ -43,9 +43,7 @@ class TestFormatCommit:
 
     def test_basic_format(self, tool: FormatCommitTool) -> None:
         """Test basic commit message format."""
-        result = asyncio.run(
-            tool.execute({"issueKey": "PROJ-123", "message": "Add login form"})
-        )
+        result = asyncio.run(tool.execute({"issueKey": "PROJ-123", "message": "Add login form"}))
 
         data = json.loads(result[0].text)
         assert data["commitMessage"] == "PROJ-123: Add login form"
@@ -54,11 +52,13 @@ class TestFormatCommit:
     def test_conventional_commit_format(self, tool: FormatCommitTool) -> None:
         """Test conventional commit format with type."""
         result = asyncio.run(
-            tool.execute({
-                "issueKey": "PROJ-123",
-                "message": "add login form",
-                "type": "feat",
-            })
+            tool.execute(
+                {
+                    "issueKey": "PROJ-123",
+                    "message": "add login form",
+                    "type": "feat",
+                }
+            )
         )
 
         data = json.loads(result[0].text)
@@ -66,9 +66,7 @@ class TestFormatCommit:
 
     def test_includes_git_command(self, tool: FormatCommitTool) -> None:
         """Test that git command is included."""
-        result = asyncio.run(
-            tool.execute({"issueKey": "PROJ-123", "message": "Add feature"})
-        )
+        result = asyncio.run(tool.execute({"issueKey": "PROJ-123", "message": "Add feature"}))
 
         data = json.loads(result[0].text)
         assert "gitCommand" in data
@@ -76,9 +74,7 @@ class TestFormatCommit:
 
     def test_uppercase_issue_key(self, tool: FormatCommitTool) -> None:
         """Test that issue key is uppercased."""
-        result = asyncio.run(
-            tool.execute({"issueKey": "proj-123", "message": "Add feature"})
-        )
+        result = asyncio.run(tool.execute({"issueKey": "proj-123", "message": "Add feature"}))
 
         data = json.loads(result[0].text)
         assert data["issueKey"] == "PROJ-123"
@@ -86,37 +82,35 @@ class TestFormatCommit:
     def test_include_description(self, tool: FormatCommitTool) -> None:
         """Test including issue description in commit."""
         result = asyncio.run(
-            tool.execute({
-                "issueKey": "PROJ-123",
-                "message": "Add feature",
-                "includeDescription": True,
-            })
+            tool.execute(
+                {
+                    "issueKey": "PROJ-123",
+                    "message": "Add feature",
+                    "includeDescription": True,
+                }
+            )
         )
 
         data = json.loads(result[0].text)
         assert "Related to: Implement user authentication" in data["commitMessage"]
         assert "Issue type: Story" in data["commitMessage"]
 
-    def test_validates_issue_exists(
-        self, tool: FormatCommitTool, mock_jira: Mock
-    ) -> None:
+    def test_validates_issue_exists(self, tool: FormatCommitTool, mock_jira: Mock) -> None:
         """Test that issue existence is validated by default."""
-        _ = asyncio.run(
-            tool.execute({"issueKey": "PROJ-123", "message": "Add feature"})
-        )
+        _ = asyncio.run(tool.execute({"issueKey": "PROJ-123", "message": "Add feature"}))
 
         mock_jira.issue.assert_called_once()
 
-    def test_skip_validation(
-        self, tool: FormatCommitTool, mock_jira: Mock
-    ) -> None:
+    def test_skip_validation(self, tool: FormatCommitTool, mock_jira: Mock) -> None:
         """Test skipping validation."""
         _ = asyncio.run(
-            tool.execute({
-                "issueKey": "PROJ-123",
-                "message": "Add feature",
-                "validate": False,
-            })
+            tool.execute(
+                {
+                    "issueKey": "PROJ-123",
+                    "message": "Add feature",
+                    "validate": False,
+                }
+            )
         )
 
         mock_jira.issue.assert_not_called()
@@ -124,9 +118,7 @@ class TestFormatCommit:
     def test_invalid_issue_key_format(self, tool: FormatCommitTool) -> None:
         """Test error for invalid issue key format."""
         with pytest.raises(ValueError) as exc_info:
-            asyncio.run(
-                tool.execute({"issueKey": "invalid", "message": "Add feature"})
-            )
+            asyncio.run(tool.execute({"issueKey": "invalid", "message": "Add feature"}))
 
         assert "Invalid issue key format" in str(exc_info.value)
 
@@ -135,9 +127,7 @@ class TestFormatCommit:
         mock_jira.issue.side_effect = Exception("Issue not found")
 
         with pytest.raises(ValueError) as exc_info:
-            asyncio.run(
-                tool.execute({"issueKey": "PROJ-999", "message": "Add feature"})
-            )
+            asyncio.run(tool.execute({"issueKey": "PROJ-999", "message": "Add feature"}))
 
         assert "not found" in str(exc_info.value)
 
@@ -158,4 +148,3 @@ class TestFormatCommit:
         assert "issueKey" in definition.inputSchema["properties"]
         assert "message" in definition.inputSchema["properties"]
         assert "type" in definition.inputSchema["properties"]
-

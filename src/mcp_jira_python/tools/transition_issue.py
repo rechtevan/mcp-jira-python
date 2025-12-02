@@ -35,9 +35,7 @@ class TransitionIssueTool(BaseTool):
                     },
                     "transition": {
                         "type": "string",
-                        "description": (
-                            "Transition name (e.g., 'Done', 'Start Progress') or ID"
-                        ),
+                        "description": ("Transition name (e.g., 'Done', 'Start Progress') or ID"),
                     },
                     "comment": {
                         "type": "string",
@@ -63,9 +61,7 @@ class TransitionIssueTool(BaseTool):
             self._field_mapper = FieldMapper(self.jira)
         return self._field_mapper
 
-    def _find_transition(
-        self, issue_key: str, transition_name_or_id: str
-    ) -> dict[str, Any] | None:
+    def _find_transition(self, issue_key: str, transition_name_or_id: str) -> dict[str, Any] | None:
         """Find a transition by name or ID."""
         transitions: list[dict[str, Any]] = self.jira.transitions(issue_key)
 
@@ -158,4 +154,3 @@ class TransitionIssueTool(BaseTool):
             raise
         except Exception as e:
             raise Exception(f"Failed to transition issue: {e!s}") from e
-

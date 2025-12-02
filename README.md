@@ -1,6 +1,7 @@
 # MCP JIRA Python 🚀
 
 [![CI](https://github.com/rechtevan/mcp-jira-python/actions/workflows/test.yml/badge.svg)](https://github.com/rechtevan/mcp-jira-python/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/rechtevan/mcp-jira-python/graph/badge.svg)](https://codecov.io/gh/rechtevan/mcp-jira-python)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![mypy](https://img.shields.io/badge/type%20checked-mypy-blue)](https://mypy-lang.org/)

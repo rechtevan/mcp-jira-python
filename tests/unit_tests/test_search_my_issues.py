@@ -78,9 +78,7 @@ class TestSearchMyIssues:
         assert "hint" in data
         assert "git commit" in data["hint"]
 
-    def test_default_assignee_filter(
-        self, tool: SearchMyIssuesTool, mock_jira: Mock
-    ) -> None:
+    def test_default_assignee_filter(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
         """Test that default role filter is assignee."""
         _ = asyncio.run(tool.execute({}))
 
@@ -88,9 +86,7 @@ class TestSearchMyIssues:
         jql = call_args[0][0]
         assert "assignee = currentUser()" in jql
 
-    def test_default_in_progress_filter(
-        self, tool: SearchMyIssuesTool, mock_jira: Mock
-    ) -> None:
+    def test_default_in_progress_filter(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
         """Test that default status filter is in_progress."""
         _ = asyncio.run(tool.execute({}))
 
@@ -98,9 +94,7 @@ class TestSearchMyIssues:
         jql = call_args[0][0]
         assert "In Progress" in jql
 
-    def test_project_filter(
-        self, tool: SearchMyIssuesTool, mock_jira: Mock
-    ) -> None:
+    def test_project_filter(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
         """Test filtering by project."""
         _ = asyncio.run(tool.execute({"projectKey": "PROJ"}))
 
@@ -108,9 +102,7 @@ class TestSearchMyIssues:
         jql = call_args[0][0]
         assert "project = PROJ" in jql
 
-    def test_reporter_role(
-        self, tool: SearchMyIssuesTool, mock_jira: Mock
-    ) -> None:
+    def test_reporter_role(self, tool: SearchMyIssuesTool, mock_jira: Mock) -> None:
         """Test filtering by reporter role."""
         _ = asyncio.run(tool.execute({"role": "reporter"}))
 
@@ -125,4 +117,3 @@ class TestSearchMyIssues:
         assert "projectKey" in definition.inputSchema["properties"]
         assert "status" in definition.inputSchema["properties"]
         assert "role" in definition.inputSchema["properties"]
-

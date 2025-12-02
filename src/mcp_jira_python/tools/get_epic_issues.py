@@ -142,4 +142,3 @@ class GetEpicIssuesTool(BaseTool):
 
         except Exception as e:
             raise Exception(f"Failed to get epic issues: {e!s}") from e
-

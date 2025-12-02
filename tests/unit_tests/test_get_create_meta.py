@@ -144,17 +144,13 @@ class TestGetCreateMeta:
         data = json.loads(result[0].text)
         story = data["issueTypes"][0]
 
-        priority_field = next(
-            f for f in story["requiredFields"] if f["name"] == "Priority"
-        )
+        priority_field = next(f for f in story["requiredFields"] if f["name"] == "Priority")
         assert "allowedValues" in priority_field
         assert "High" in priority_field["allowedValues"]
 
     def test_filter_by_issue_type(self, tool: GetCreateMetaTool) -> None:
         """Test filtering to specific issue type."""
-        result = asyncio.run(
-            tool.execute({"projectKey": "PROJ", "issueType": "Bug"})
-        )
+        result = asyncio.run(tool.execute({"projectKey": "PROJ", "issueType": "Bug"}))
 
         data = json.loads(result[0].text)
         assert len(data["issueTypes"]) == 1
@@ -162,9 +158,7 @@ class TestGetCreateMeta:
 
     def test_filter_case_insensitive(self, tool: GetCreateMetaTool) -> None:
         """Test that issue type filter is case-insensitive."""
-        result = asyncio.run(
-            tool.execute({"projectKey": "PROJ", "issueType": "story"})
-        )
+        result = asyncio.run(tool.execute({"projectKey": "PROJ", "issueType": "story"}))
 
         data = json.loads(result[0].text)
         assert len(data["issueTypes"]) == 1
@@ -173,9 +167,7 @@ class TestGetCreateMeta:
     def test_invalid_issue_type_error(self, tool: GetCreateMetaTool) -> None:
         """Test error for invalid issue type."""
         with pytest.raises(ValueError) as exc_info:
-            asyncio.run(
-                tool.execute({"projectKey": "PROJ", "issueType": "Invalid"})
-            )
+            asyncio.run(tool.execute({"projectKey": "PROJ", "issueType": "Invalid"}))
 
         error = str(exc_info.value)
         assert "Invalid" in error
@@ -192,4 +184,3 @@ class TestGetCreateMeta:
         assert definition.name == "get_create_meta"
         assert "projectKey" in definition.inputSchema["properties"]
         assert "issueType" in definition.inputSchema["properties"]
-

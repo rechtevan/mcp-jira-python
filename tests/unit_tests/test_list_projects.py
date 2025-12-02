@@ -112,4 +112,3 @@ class TestListProjects:
         assert "query" in definition.inputSchema["properties"]
         assert "maxResults" in definition.inputSchema["properties"]
         assert definition.inputSchema["required"] == []
-

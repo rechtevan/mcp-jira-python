@@ -96,9 +96,7 @@ class SuggestIssueFieldsTool(BaseTool):
             allowed = field_info.get("allowedValues", [])
             if allowed and len(allowed) <= 10:
                 field_data["allowedValues"] = [
-                    v.get("name", v.get("value", str(v)))
-                    for v in allowed
-                    if isinstance(v, dict)
+                    v.get("name", v.get("value", str(v))) for v in allowed if isinstance(v, dict)
                 ]
 
             if field_info.get("required"):
@@ -155,10 +153,13 @@ class SuggestIssueFieldsTool(BaseTool):
                 return [
                     TextContent(
                         type="text",
-                        text=json.dumps({
-                            "error": f"Issue type '{issue_type}' not found",
-                            "availableTypes": available,
-                        }, indent=2),
+                        text=json.dumps(
+                            {
+                                "error": f"Issue type '{issue_type}' not found",
+                                "availableTypes": available,
+                            },
+                            indent=2,
+                        ),
                     )
                 ]
 
