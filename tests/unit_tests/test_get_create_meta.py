@@ -184,3 +184,4 @@ class TestGetCreateMeta:
         assert definition.name == "get_create_meta"
         assert "projectKey" in definition.inputSchema["properties"]
         assert "issueType" in definition.inputSchema["properties"]
+

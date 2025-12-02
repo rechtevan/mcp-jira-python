@@ -142,3 +142,4 @@ class TestGetFieldMappingTool:
         assert "id" in field
         assert "custom" in field
         assert "type" in field
+

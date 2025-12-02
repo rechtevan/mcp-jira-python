@@ -217,3 +217,4 @@ class TestFormatFieldValue:
         """Test formatting list of values."""
         result = tool._format_field_value([{"name": "A"}, {"name": "B"}])
         assert result == ["A", "B"]
+

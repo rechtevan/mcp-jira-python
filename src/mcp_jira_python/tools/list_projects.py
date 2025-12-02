@@ -93,3 +93,4 @@ class ListProjectsTool(BaseTool):
 
         except Exception as e:
             raise Exception(f"Failed to list projects: {e!s}") from e
+
