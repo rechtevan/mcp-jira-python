@@ -1,9 +1,11 @@
-import unittest
 import asyncio
-import tempfile
 import os
-from unittest.mock import Mock, MagicMock
+import tempfile
+import unittest
+from unittest.mock import Mock
+
 from mcp_jira_python.tools.get_issue_attachment import GetIssueAttachmentTool
+
 
 class TestGetIssueAttachmentTool(unittest.TestCase):
     def setUp(self):

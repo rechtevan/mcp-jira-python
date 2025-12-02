@@ -45,11 +45,12 @@ class AttachContentTool(BaseTool):
         content = arguments.get("content")
         encoding = arguments.get("encoding", "none")
 
-        if not all([issue_key, filename, content]):
+        if not issue_key or not filename or not content:
             raise ValueError("issueKey, filename, and content are required")
 
         try:
             # Decode base64 content if specified
+            # Type narrowing: content is guaranteed to be str after the check above
             if encoding == "base64":
                 try:
                     content_bytes = base64.b64decode(content)

@@ -1,27 +1,29 @@
-import unittest
 import asyncio
-import os
-import json
 import base64
-import warnings
-import sys
-import tracemalloc
 import datetime
+import json
+import os
+import sys
 import time
-from io import StringIO
+import tracemalloc
+import unittest
+import warnings
 from contextlib import AsyncExitStack
+from io import StringIO
+
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+
 
 class TestOutputCapture:
     """Helper class to capture test output"""
     def __init__(self):
         self.output = StringIO()
-    
+
     def __enter__(self):
         sys.stdout = self.output
         return self.output
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout = sys.__stdout__
 
@@ -39,11 +41,11 @@ class _JsonTestResult(unittest.TextTestResult):
     def addSuccess(self, test):
         super().addSuccess(test)
         self._store_result(test, "PASS")
-        
+
     def addError(self, test, err):
         super().addError(test, err)
         self._store_result(test, "ERROR", err)
-        
+
     def addFailure(self, test, err):
         super().addFailure(test, err)
         self._store_result(test, "FAIL", err)
@@ -52,7 +54,7 @@ class _JsonTestResult(unittest.TextTestResult):
         test_name = test._testMethodName
         test_method = getattr(test, test_name)
         duration = time.time() - self.current_test_start
-        
+
         self.test_results[test_name] = {
             'description': test_method.__doc__ or '',
             'status': status,
@@ -91,7 +93,7 @@ class TestJiraMCPIntegration(unittest.TestCase):
         """Clean up after each test"""
         self.output = self.output_capture.output.getvalue()
         self.output_capture.__exit__(None, None, None)
-        
+
         # Delete test issue if it exists
         if self.issue_key:
             self.run_async_test(self.delete_test_issue(self.issue_key))
@@ -150,7 +152,7 @@ class TestJiraMCPIntegration(unittest.TestCase):
     async def call_tool(self, tool_name, arguments):
         """Call an MCP tool and return its parsed response."""
         response = await self.session.call_tool(tool_name, arguments)
-        
+
         # Get the TextContent from the response
         if isinstance(response.content, list):
             if not response.content:
@@ -158,18 +160,18 @@ class TestJiraMCPIntegration(unittest.TestCase):
             content = response.content[0]
         else:
             content = response.content
-        
+
         # Check for error response before parsing
         if hasattr(content, 'isError') and content.isError:
             raise Exception(content.text)
-        
+
         # Get the text from TextContent
         if hasattr(content, 'text'):
             text = content.text
-            
+
             if not isinstance(text, str):
                 return text
-                
+
             # Try JSON-style (double quotes) first
             try:
                 return json.loads(text)
@@ -186,7 +188,7 @@ class TestJiraMCPIntegration(unittest.TestCase):
                         except (SyntaxError, ValueError):
                             return text
                     return text
-                    
+
         return content
 
     def test_0_create_jira_issue(self):
@@ -205,11 +207,11 @@ class TestJiraMCPIntegration(unittest.TestCase):
                         "assignee": self.test_user_email
                     }
                 )
-                
+
                 # print("\n=== RESPONSE HANDLING ===")
                 # print(f"Result: {result}")
                 # print(f"Result type: {type(result)}")
-                
+
                 if isinstance(result, str) and result.startswith('{'):
                     # print("Converting string result to dict")
                     try:
@@ -217,19 +219,19 @@ class TestJiraMCPIntegration(unittest.TestCase):
                     except json.JSONDecodeError:
                         import ast
                         result = ast.literal_eval(result)
-                
+
                 if isinstance(result, dict):
                     # print("Extracting key from dict")
                     self.issue_key = result.get('key')
                     # print(f"Extracted key: {self.issue_key}")
                 # else:
                 #     print(f"Result is not a dict: {type(result)}")
-                
+
                 # print("=== END RESPONSE HANDLING ===\n")
-                
+
                 self.assertIsNotNone(self.issue_key, f"No issue key in response. Response was: {result}")
                 print(f"Successfully created new issue: {self.issue_key}")
-                
+
             finally:
                 await self.teardown_session()
 
@@ -282,7 +284,7 @@ class TestJiraMCPIntegration(unittest.TestCase):
                         "issueType": "Task"
                     }
                 )
-                
+
                 print(f"Created issue result: {issue_result}")
                 self.issue_key = issue_result.get('key')
 
@@ -303,7 +305,7 @@ class TestJiraMCPIntegration(unittest.TestCase):
                         }
                     }
                 )
-                
+
                 print(f"Add comment result: {result}")
                 if isinstance(result, str):
                     try:
@@ -311,10 +313,10 @@ class TestJiraMCPIntegration(unittest.TestCase):
                         result = ast.literal_eval(result)
                     except (SyntaxError, ValueError):
                         print(f"Failed to parse result: {result}")
-                
-                self.assertTrue(isinstance(result, dict), 
+
+                self.assertTrue(isinstance(result, dict),
                               f"Expected dict, got {type(result)}: {result}")
-                self.assertTrue("id" in result or "message" in result, 
+                self.assertTrue("id" in result or "message" in result,
                               f"Expected id or message in response: {result}")
                 print(f"Successfully added comment with attachment to {self.issue_key}")
             finally:
@@ -337,7 +339,7 @@ class TestJiraMCPIntegration(unittest.TestCase):
                         "issueType": "Task"
                     }
                 )
-                
+
                 self.issue_key = issue_result.get('key')
                 print(f"Created test issue: {self.issue_key}")
 
@@ -349,9 +351,9 @@ class TestJiraMCPIntegration(unittest.TestCase):
                         "jql": f"key = {self.issue_key}"
                     }
                 )
-                
+
                 print(f"Search result: {search_result}")
-                
+
                 # Ensure result is list-like
                 if isinstance(search_result, str):
                     try:
@@ -359,12 +361,12 @@ class TestJiraMCPIntegration(unittest.TestCase):
                         search_result = ast.literal_eval(search_result)
                     except (SyntaxError, ValueError):
                         pass
-                        
-                self.assertTrue(isinstance(search_result, (list, tuple)), 
+
+                self.assertTrue(isinstance(search_result, (list, tuple)),
                               f"Expected list, got {type(search_result)}: {search_result}")
                 self.assertTrue(len(search_result) > 0)
                 print(f"Successfully searched for issues in project {self.project_key}")
-                
+
             finally:
                 await self.teardown_session()
 
@@ -521,11 +523,11 @@ class TestJiraMCPIntegration(unittest.TestCase):
             await self.setup_session()
             try:
                 result = await self.call_tool(
-                    "list_issue_types", 
+                    "list_issue_types",
                     {"projectKey": self.project_key}  # Add project key as argument
                 )
                 # print(f"Issue types result: {result}")
-                
+
                 # First check if result is string and attempt to parse it
                 if isinstance(result, str):
                     try:
@@ -534,11 +536,11 @@ class TestJiraMCPIntegration(unittest.TestCase):
                     except (SyntaxError, ValueError):
                         print(f"Failed to parse result: {result}")
                         raise AssertionError(f"Failed to parse response: {result}")
-                
+
                 # Now validate result
-                self.assertTrue(isinstance(result, (list, tuple)), 
+                self.assertTrue(isinstance(result, (list, tuple)),
                               f"Expected list, got {type(result)}: {result}")
-                
+
                 # Convert dicts if they're strings
                 parsed_result = []
                 for item in result:
@@ -550,15 +552,15 @@ class TestJiraMCPIntegration(unittest.TestCase):
                             parsed_result.append(item)
                     else:
                         parsed_result.append(item)
-                
+
                 # Check for Task type
                 self.assertTrue(
-                    any(isinstance(t, dict) and 'name' in t and 'Task' in t['name'] 
+                    any(isinstance(t, dict) and 'name' in t and 'Task' in t['name']
                         for t in parsed_result),
                     f"No Task type found in results: {parsed_result}"
                 )
                 print("Successfully retrieved issue types")
-                
+
             finally:
                 await self.teardown_session()
 
@@ -592,7 +594,7 @@ class TestJiraMCPIntegration(unittest.TestCase):
                         "issueType": "Task"
                     }
                 )
-                
+
                 issue_key = issue_result.get('key')
                 print(f"Created issue {issue_key} for deletion test")
 
@@ -620,11 +622,11 @@ class TestJiraMCPIntegration(unittest.TestCase):
                     error_msg = str(e)
                     # Check for either 404 error or existence error
                     self.assertTrue(
-                        "HTTP 404" in error_msg or 
+                        "HTTP 404" in error_msg or
                         "does not exist" in error_msg,
                         f"Unexpected error response: {error_msg}"
                     )
-                    
+
             finally:
                 await self.teardown_session()
 
@@ -687,7 +689,7 @@ def main():
     # Get memory statistics
     snapshot = tracemalloc.take_snapshot()
     top_stats = snapshot.statistics("lineno")
-    
+
     for stat in top_stats[:10]:
         test_results["memory_stats"].append({
             "size": stat.size,

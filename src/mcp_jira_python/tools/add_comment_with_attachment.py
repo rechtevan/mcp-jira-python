@@ -48,9 +48,10 @@ Note: Only use these Jira-specific emoticons. NEVER USE UNICODE EMOJIS!""",
         filepath_str = arguments.get("filepath")
         comment_text = arguments.get("comment")
 
-        if not all([issue_key, filename, filepath_str, comment_text]):
+        if not issue_key or not filename or not filepath_str or not comment_text:
             raise ValueError("issueKey, filename, filepath, and comment are required")
 
+        # Type narrowing: filepath_str is guaranteed to be str after the check above
         filepath = Path(filepath_str)
 
         try:

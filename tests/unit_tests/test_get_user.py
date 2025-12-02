@@ -1,7 +1,9 @@
-import unittest
 import asyncio
+import unittest
 from unittest.mock import Mock
+
 from mcp_jira_python.tools.get_user import GetUserTool
+
 
 class TestGetUserTool(unittest.TestCase):
     def setUp(self):

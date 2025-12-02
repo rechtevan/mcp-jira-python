@@ -1,89 +1,132 @@
 # MCP JIRA Python Tests
 
-This directory contains the test suite for the MCP JIRA Python server. The tests are organized into several categories to ensure comprehensive coverage of functionality.
+This directory contains the test suite for the MCP JIRA Python server.
 
-## Test Files Overview
+## Test Categories
 
-### Core Integration Tests
+| Category | Marker | Description | Jira Required |
+|----------|--------|-------------|---------------|
+| **Unit** | `@pytest.mark.unit` | Fast tests with mocked dependencies | No |
+| **Integration** | `@pytest.mark.integration` | Tests against real Jira | Yes |
+| **E2E** | `@pytest.mark.e2e` | Full MCP server flow tests | Some |
 
-**test_jira_connection.py**
-- Tests basic connectivity to JIRA
-- Verifies authentication and configuration
-- Checks network-related error handling
+## Directory Structure
 
-**test_jira_endpoints.py**
-- Tests all endpoints used by server.py
-- Verifies correct request/response handling
-- Ensures proper parameter validation
-
-**test_jira_mcp_integration.py**
-- Integration tests that make actual server requests
-- Tests the MCP server's handling of JIRA operations
-- Verifies proper tool registration and discovery
-- Tests the full request-response cycle through the MCP protocol
-
-**test_jira_mcp_system.py**
-- System-level tests focusing on user patterns
-- Tests heavy usage scenarios and load handling
-- Verifies system stability under various conditions
-
-### Modular Tool Tests
-
-**endpoint_tests/**
-- Individual tests for each endpoint function
-- Tests specific to the old monolithic structure
-
-**unit_tests/**
-- Unit tests for individual tool classes in the refactored structure
-- Tests each tool in isolation with mocks
-- Covers the new tools/ directory structure
-
-## Running the Tests
-
-To run the full test suite:
-```bash
-python -m unittest discover tests
+```
+tests/
+├── conftest.py              # Shared fixtures and pytest configuration
+├── unit_tests/              # Unit tests (mocked, fast)
+│   ├── test_get_issue.py
+│   ├── test_create_issue.py
+│   └── ...
+├── integration_tests/       # Integration tests (requires Jira)
+│   └── ...
+├── e2e_tests/               # End-to-end tests
+│   └── test_mcp_server.py
+└── endpoint_tests/          # Legacy endpoint tests
 ```
 
-To run specific test categories:
+## Running Tests
+
+### With pytest (recommended)
+
 ```bash
-# Run integration tests
-python -m unittest tests/test_jira_mcp_integration.py
+# Run all tests
+pytest
 
-# Run unit tests for refactored tools
+# Run only unit tests (fast, no Jira needed)
+pytest -m unit
+
+# Run only integration tests (requires Jira)
+pytest -m integration
+
+# Run only e2e tests
+pytest -m e2e
+
+# Run with coverage
+pytest --cov=src/mcp_jira_python --cov-report=term-missing --cov-report=html
+
+# Run with coverage and fail if below threshold
+pytest --cov=src/mcp_jira_python --cov-fail-under=90
+```
+
+### With unittest (legacy)
+
+```bash
+python -m unittest discover tests
 python -m unittest discover tests/unit_tests
-
-# Run endpoint tests
-python -m unittest discover tests/endpoint_tests
 ```
 
 ## Environment Setup
 
-The integration and system tests require proper JIRA credentials. Set these environment variables before running the tests:
+### For Integration/E2E Tests
+
+Create a `.env` file in the tests directory or use environment variables:
 
 ```bash
-export JIRA_HOST="your-domain.atlassian.net"
-export JIRA_EMAIL="your-email@example.com"
-export JIRA_API_TOKEN="your-api-token"
-export JIRA_PROJECT_KEY="TEST"  # Project key for test issues
+# Jira Server/Data Center (with PAT)
+export JIRA_HOST="jira.yourcompany.com"
+export JIRA_BEARER_TOKEN="your_pat_token"
+export JIRA_PROJECT_KEY="TEST"
+
+# OR Jira Cloud
+export JIRA_HOST="yourcompany.atlassian.net"
+export JIRA_EMAIL="you@company.com"
+export JIRA_API_TOKEN="your_api_token"
+export JIRA_PROJECT_KEY="TEST"
 ```
 
-## Test Configuration
+## Coverage Standards
 
-**conftest.py** sets up the Python path to ensure tests can import from the src/ directory. This file is essential for proper test execution.
+| Scope | Minimum |
+|-------|---------|
+| **Overall** | 90% |
+| Per module | 80% |
+| Per class | 80% |
+| Per function | 80% |
 
-## Test Coverage
+## Writing Tests
 
-The test suite covers:
-- All JIRA API operations
-- MCP protocol integration
-- Error handling and edge cases
-- Authentication and connectivity
-- Tool registration and discovery
-- Complex workflows and attachments
+### Unit Test Example
 
-Run tests with coverage reporting:
-```bash
-python -m coverage run -m unittest discover tests
-python -m coverage report
+```python
+import pytest
+from unittest.mock import Mock
+from mcp_jira_python.tools.get_issue import GetIssueTool
+
+@pytest.mark.unit
+class TestGetIssueTool:
+    def test_execute_returns_issue_data(self, mock_jira, mock_issue):
+        tool = GetIssueTool()
+        tool.jira = mock_jira
+        mock_jira.issue.return_value = mock_issue
+
+        result = asyncio.run(tool.execute({"issueKey": "TEST-123"}))
+
+        assert result[0].type == "text"
+        assert "TEST-123" in result[0].text
 ```
+
+### Integration Test Example
+
+```python
+import pytest
+
+@pytest.mark.integration
+class TestJiraIntegration:
+    def test_search_issues(self, jira_client, test_project_key):
+        issues = jira_client.search_issues(f"project = {test_project_key}")
+        assert issues is not None
+```
+
+## Fixtures
+
+Key fixtures defined in `conftest.py`:
+
+| Fixture | Description |
+|---------|-------------|
+| `mock_jira` | Mock Jira client for unit tests |
+| `mock_issue` | Mock issue with standard fields |
+| `jira_client` | Real Jira client (integration tests) |
+| `test_project_key` | Project key from env or "TEST" |
+| `requires_jira` | Skip if Jira not configured |

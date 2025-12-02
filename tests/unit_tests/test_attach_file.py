@@ -1,9 +1,11 @@
-import unittest
 import asyncio
-import tempfile
 import os
+import tempfile
+import unittest
 from unittest.mock import Mock, patch
+
 from mcp_jira_python.tools.attach_file import AttachFileTool
+
 
 class TestAttachFileTool(unittest.TestCase):
     def setUp(self):

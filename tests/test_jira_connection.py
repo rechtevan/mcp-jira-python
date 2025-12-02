@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
+
 from jira import JIRA
+
 
 def test_jira_connection():
     # Check for required environment variables
@@ -22,7 +24,7 @@ def test_jira_connection():
 
         # Get issues from TEST project
         issues = jira.search_issues('project = TEST ORDER BY created DESC', maxResults=5)
-        
+
         print("\nLatest TEST Project Issues:")
         print("-" * 50)
         for issue in issues:
@@ -30,9 +32,9 @@ def test_jira_connection():
             print(f"Summary: {issue.fields.summary}")
             print(f"Status: {issue.fields.status}")
             print("-" * 50)
-        
+
         print(f"\nTotal issues found: {len(issues)}")
-        
+
         # Try to get TEST-1 specifically
         try:
             test_issue = jira.issue("TEST-1")
@@ -43,10 +45,10 @@ def test_jira_connection():
             print(f"Status: {test_issue.fields.status}")
             print(f"Created: {test_issue.fields.created}")
         except Exception as e:
-            print(f"\nCouldn't access TEST-1: {str(e)}")
+            print(f"\nCouldn't access TEST-1: {e!s}")
 
     except Exception as e:
-        print(f"\nError connecting to JIRA: {str(e)}")
+        print(f"\nError connecting to JIRA: {e!s}")
         print("Please check your environment variables and network connection.")
 
 if __name__ == "__main__":

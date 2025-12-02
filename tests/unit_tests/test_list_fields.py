@@ -1,7 +1,9 @@
-import unittest
 import asyncio
+import unittest
 from unittest.mock import Mock
+
 from mcp_jira_python.tools.list_fields import ListFieldsTool
+
 
 class TestListFieldsTool(unittest.TestCase):
     def setUp(self):

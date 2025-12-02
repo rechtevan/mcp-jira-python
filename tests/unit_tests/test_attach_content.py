@@ -1,8 +1,10 @@
-import unittest
 import asyncio
 import base64
+import unittest
 from unittest.mock import Mock
+
 from mcp_jira_python.tools.attach_content import AttachContentTool
+
 
 class TestAttachContentTool(unittest.TestCase):
     def setUp(self):

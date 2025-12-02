@@ -1,28 +1,29 @@
-import unittest
 import asyncio
-import os
-import json
 import base64
-import warnings
-import sys
-import tracemalloc
 import datetime
+import json
+import os
+import sys
 import time
-import re
+import tracemalloc
+import unittest
+import warnings
+from contextlib import AsyncExitStack
 from io import StringIO
-from contextlib import AsyncExitStack, redirect_stdout
+
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+
 
 class TestOutputCapture:
     """Helper class to capture test output"""
     def __init__(self):
         self.output = StringIO()
-    
+
     def __enter__(self):
         sys.stdout = self.output
         return self.output
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout = sys.__stdout__
 
@@ -31,12 +32,12 @@ class _JsonTestResult(unittest.TextTestResult):
     def addSuccess(self, test):
         super().addSuccess(test)
         TestJiraMCPSystem.test_details[test._testMethodName]['status'] = 'PASS'
-        
+
     def addError(self, test, err):
         super().addError(test, err)
         TestJiraMCPSystem.test_details[test._testMethodName]['status'] = 'ERROR'
         TestJiraMCPSystem.test_details[test._testMethodName]['error'] = self._exc_info_to_string(err, test)
-        
+
     def addFailure(self, test, err):
         super().addFailure(test, err)
         TestJiraMCPSystem.test_details[test._testMethodName]['status'] = 'FAIL'
@@ -63,7 +64,7 @@ class TestJiraMCPSystem(unittest.TestCase):
     def setUp(self):
         self.output_capture = TestOutputCapture()
         self.start_time = time.time()
-        
+
     def tearDown(self):
         # Store test details after each test
         test_name = self._testMethodName
@@ -73,7 +74,7 @@ class TestJiraMCPSystem(unittest.TestCase):
             'duration': time.time() - self.start_time,
             'status': 'PASS'  # Will be updated if test fails
         }
-        
+
     async def setup_session(self):
         """Set up the MCP client session."""
         self.exit_stack = AsyncExitStack()
@@ -112,7 +113,7 @@ class TestJiraMCPSystem(unittest.TestCase):
                     return first_item
             return response.content
         except Exception as e:
-            return f"Error: {str(e)}"
+            return f"Error: {e!s}"
 
     def run_async_test(self, coroutine):
         """Helper to run async tests."""
@@ -172,7 +173,7 @@ class TestJiraMCPSystem(unittest.TestCase):
                     }
                 )
                 self.assertTrue("message" in comment_result)
-                
+
                 # 3. Search for the issue
                 search_result = await self.simulate_llm_request(
                     "search_issues",
@@ -201,7 +202,7 @@ class TestJiraMCPSystem(unittest.TestCase):
                     }
                 )
                 self.assertTrue("Error" in str(result))
-                
+
                 # Test missing required arguments
                 result = await self.simulate_llm_request(
                     "add_comment",
@@ -211,7 +212,7 @@ class TestJiraMCPSystem(unittest.TestCase):
                     }
                 )
                 self.assertTrue("Error" in str(result))
-                
+
                 # Test invalid tool name
                 result = await self.simulate_llm_request(
                     "nonexistent_tool",
@@ -221,7 +222,7 @@ class TestJiraMCPSystem(unittest.TestCase):
                 print("Error handling tests completed")
             finally:
                 await self.teardown_session()
-            
+
         self.run_async_test(test_errors())
 
     def test_5_complex_data_handling(self):
@@ -232,7 +233,7 @@ class TestJiraMCPSystem(unittest.TestCase):
                 # Test comment with attachment
                 test_content = "Test file content"
                 test_content_b64 = base64.b64encode(test_content.encode()).decode()
-                
+
                 result = await self.simulate_llm_request(
                     "add_comment_with_attachment",
                     {
@@ -249,7 +250,7 @@ class TestJiraMCPSystem(unittest.TestCase):
                 print("Complex data handling tests completed")
             finally:
                 await self.teardown_session()
-            
+
         self.run_async_test(test_complex_data())
 
     def test_6_rate_limiting(self):
@@ -264,10 +265,10 @@ class TestJiraMCPSystem(unittest.TestCase):
                         "get_issue",
                         {"issueKey": "TEST-123"}
                     ))
-                
+
                 # Run requests concurrently
                 results = await asyncio.gather(*tasks, return_exceptions=True)
-                
+
                 # Verify all requests completed
                 self.assertEqual(len(results), 5)
                 # Check if any rate limiting errors occurred
@@ -275,7 +276,7 @@ class TestJiraMCPSystem(unittest.TestCase):
                 print(f"Rate limiting test completed {'with rate limits' if rate_limited else 'without rate limits'}")
             finally:
                 await self.teardown_session()
-            
+
         self.run_async_test(test_rate_limits())
 
 def main():
@@ -286,14 +287,14 @@ def main():
         message=".*MemoryObject.*",
         module="anyio.streams.memory"
     )
-    
+
     # Also suppress at runtime for any that slip through
     warnings.filterwarnings(
         "ignore",
         category=ResourceWarning,
         message=".*MemoryObject.*"
     )
-    
+
     # Enable tracemalloc for debugging
     tracemalloc.start()
 
@@ -343,7 +344,7 @@ def main():
     # Get memory statistics
     snapshot = tracemalloc.take_snapshot()
     top_stats = snapshot.statistics("lineno")
-    
+
     for stat in top_stats[:10]:
         test_results["memory_stats"].append({
             "size": stat.size,

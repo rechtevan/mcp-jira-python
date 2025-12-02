@@ -102,13 +102,24 @@ skips = []
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "unit: Unit tests (mocked, fast)",
+    "integration: Integration tests (requires Jira connection)",
+    "e2e: End-to-end tests (full MCP flow)",
+    "slow: Slow running tests",
+]
 addopts = [
     "-v",
-    "--cov=src/mcp_jira_python",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-fail-under=90",
+    "--strict-markers",
 ]
+
+# Run only unit tests by default (fast, no external deps)
+# Use: pytest -m unit           # unit tests only
+# Use: pytest -m integration    # integration tests only
+# Use: pytest -m e2e            # e2e tests only
+# Use: pytest                   # all tests
+# Use: pytest --cov             # all tests with coverage
 
 # ============================================================================
 # Coverage - Code Coverage

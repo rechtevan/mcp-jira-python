@@ -1,6 +1,8 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
+
 from mcp_jira_python.tools.base import BaseTool
+
 
 class MockBaseTool(BaseTool):
     """Mock implementation of BaseTool for testing"""
@@ -19,5 +21,5 @@ class TestBaseTool(unittest.TestCase):
         self.tool = MockBaseTool()  # Use MockBaseTool instead of BaseTool
         self.mock_jira = Mock()
         self.tool.jira = self.mock_jira
-        
+
     # Rest of the test cases remain the same...

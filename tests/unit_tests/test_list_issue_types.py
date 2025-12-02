@@ -1,7 +1,9 @@
-import unittest
 import asyncio
+import unittest
 from unittest.mock import Mock
+
 from mcp_jira_python.tools.list_issue_types import ListIssueTypesTool
+
 
 class TestListIssueTypesTool(unittest.TestCase):
     def setUp(self):

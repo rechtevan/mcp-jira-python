@@ -55,7 +55,7 @@ else:
     )
 
 
-@server.list_tools()
+@server.list_tools()  # type: ignore[no-untyped-call]
 async def handle_list_tools() -> list[types.Tool]:
     return get_all_tools()
 

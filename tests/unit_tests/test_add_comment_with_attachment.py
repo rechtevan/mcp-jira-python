@@ -1,26 +1,27 @@
-import unittest
-import base64
 import asyncio
+import unittest
 from unittest.mock import Mock
+
 from mcp_jira_python.tools.add_comment_with_attachment import AddCommentWithAttachmentTool
+
 
 class TestAddCommentWithAttachmentTool(unittest.TestCase):
     def setUp(self):
         self.tool = AddCommentWithAttachmentTool()
         self.mock_jira = Mock()
         self.tool.jira = self.mock_jira
-        
+
         # Test data
         self.test_issue_key = "TEST-123"
         self.test_comment = "Test comment with attachment"
         self.test_file_content = b"Test file content"
         self.test_file_name = "test.txt"
-        
+
         # Mock attachment
         self.mock_attachment = Mock()
         self.mock_attachment.id = "67890"
         self.mock_attachment.filename = self.test_file_name
-        
+
         # Mock comment
         self.mock_comment = Mock()
         self.mock_comment.id = "12345"

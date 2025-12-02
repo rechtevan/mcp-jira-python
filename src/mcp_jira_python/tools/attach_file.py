@@ -36,9 +36,10 @@ class AttachFileTool(BaseTool):
         filename = arguments.get("filename")
         filepath_str = arguments.get("filepath")
 
-        if not all([issue_key, filename, filepath_str]):
+        if not issue_key or not filename or not filepath_str:
             raise ValueError("issueKey, filename, and filepath are required")
 
+        # Type narrowing: after the check above, these are guaranteed to be str
         filepath = Path(filepath_str)
 
         try:

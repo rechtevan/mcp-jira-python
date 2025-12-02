@@ -1,8 +1,11 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from mcp.types import TextContent, Tool
 
 from .base import BaseTool
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class UpdateIssueTool(BaseTool):
@@ -29,8 +32,8 @@ class UpdateIssueTool(BaseTool):
         if not issue_key:
             raise ValueError("issueKey is required")
 
-        update_fields = {}
-        field_mappings = {
+        update_fields: dict[str, Any] = {}
+        field_mappings: dict[str, Callable[[Any], Any]] = {
             "summary": lambda x: x,
             "description": lambda x: x,
             "assignee": lambda x: {"emailAddress": x},
