@@ -15,10 +15,13 @@ from mcp_jira_python.tools import get_all_tools, get_tool
 # Load environment from .env file (if present)
 # Checks for .env.jira first, then falls back to .env
 # Environment variables passed via MCP client config will override these
-env_file = Path(".env.jira")
+# Use absolute path relative to project root (2 levels up from this file)
+project_root = Path(__file__).parent.parent.parent
+env_file = project_root / ".env.jira"
 if not env_file.exists():
-    env_file = Path(".env")
-load_dotenv(env_file)
+    env_file = project_root / ".env"
+if env_file.exists():
+    load_dotenv(env_file)
 
 server = Server("jira-api")
 
