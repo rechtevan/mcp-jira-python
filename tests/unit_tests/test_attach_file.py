@@ -1,7 +1,9 @@
+"""Unit tests for AttachFileTool."""
+
 import asyncio
-import os
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 from mcp_jira_python.tools.attach_file import AttachFileTool
@@ -23,16 +25,16 @@ class TestAttachFileTool(unittest.TestCase):
         self.mock_jira.add_attachment.return_value = None
 
         # Create a temporary test file
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp:
             tmp.write("Test file content")
-            tmp_path = tmp.name
+            tmp_path = Path(tmp.name)
 
         try:
             # Test input
             test_input = {
                 "issueKey": self.test_issue_key,
                 "filename": self.test_filename,
-                "filepath": tmp_path
+                "filepath": str(tmp_path),
             }
 
             # Execute
@@ -45,20 +47,18 @@ class TestAttachFileTool(unittest.TestCase):
 
             # Verify JIRA API call
             self.mock_jira.add_attachment.assert_called_once_with(
-                self.test_issue_key,
-                tmp_path,
-                filename=self.test_filename
+                self.test_issue_key, str(tmp_path), filename=self.test_filename
             )
         finally:
             # Clean up temp file
-            if os.path.exists(tmp_path):
-                os.unlink(tmp_path)
+            if tmp_path.exists():
+                tmp_path.unlink()
 
     def test_execute_missing_required_fields(self):
         """Test error handling for missing required fields"""
         test_input = {
             "issueKey": self.test_issue_key,
-            "filename": self.test_filename
+            "filename": self.test_filename,
             # Missing filepath
         }
 
@@ -72,7 +72,7 @@ class TestAttachFileTool(unittest.TestCase):
         test_input = {
             "issueKey": self.test_issue_key,
             "filename": self.test_filename,
-            "filepath": "/nonexistent/file.txt"
+            "filepath": "/nonexistent/file.txt",
         }
 
         # ValueError gets wrapped in Exception by the tool
@@ -81,29 +81,30 @@ class TestAttachFileTool(unittest.TestCase):
 
         self.assertIn("not found", str(context.exception).lower())
 
-    @patch('os.path.getsize')
-    def test_execute_file_too_large(self, mock_getsize):
+    def test_execute_file_too_large(self):
         """Test error handling for files exceeding size limit"""
-        # Mock getsize to return a large value
-        mock_getsize.return_value = 11 * 1024 * 1024  # 11MB
-
         # Create a temporary file
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp:
             tmp.write("small content")
-            tmp_path = tmp.name
+            tmp_path = Path(tmp.name)
 
         try:
             test_input = {
                 "issueKey": self.test_issue_key,
                 "filename": self.test_filename,
-                "filepath": tmp_path
+                "filepath": str(tmp_path),
             }
 
-            # ValueError gets wrapped in Exception by the tool
-            with self.assertRaises(Exception) as context:
-                asyncio.run(self.tool.execute(test_input))
+            # Mock Path.stat to return large file size
+            mock_stat = Mock()
+            mock_stat.st_size = 11 * 1024 * 1024  # 11MB
 
-            self.assertIn("too large", str(context.exception).lower())
+            with patch("pathlib.Path.stat", return_value=mock_stat):
+                # ValueError gets wrapped in Exception by the tool
+                with self.assertRaises(Exception) as context:
+                    asyncio.run(self.tool.execute(test_input))
+
+                self.assertIn("too large", str(context.exception).lower())
         finally:
-            if os.path.exists(tmp_path):
-                os.unlink(tmp_path)
+            if tmp_path.exists():
+                tmp_path.unlink()

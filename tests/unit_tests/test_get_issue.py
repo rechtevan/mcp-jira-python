@@ -42,6 +42,9 @@ class TestGetIssueTool(unittest.TestCase):
         mock_attachment.created = "2024-01-30T12:00:00.000+0000"
         self.mock_issue.fields.attachment = [mock_attachment]
 
+        # Mock raw fields for custom field extraction
+        self.mock_issue.raw = {"fields": {}}
+
     def test_execute(self):
         """Test getting issue details"""
         # Setup mock response

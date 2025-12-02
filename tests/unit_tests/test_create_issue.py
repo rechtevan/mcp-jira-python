@@ -20,6 +20,8 @@ class TestCreateIssueTool(unittest.TestCase):
         # Mock issue response
         self.mock_issue = Mock()
         self.mock_issue.key = self.test_issue_key
+        self.mock_issue.id = "12345"
+        self.mock_issue.self = "https://jira.example.com/rest/api/2/issue/12345"
 
     def test_execute(self):
         """Test creating a new Jira issue"""
