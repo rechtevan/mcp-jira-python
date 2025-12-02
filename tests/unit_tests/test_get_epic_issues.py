@@ -139,5 +139,3 @@ class TestGetEpicIssues:
         assert definition.name == "get_epic_issues"
         assert "epicKey" in definition.inputSchema["properties"]
         assert "status" in definition.inputSchema["properties"]
-
-

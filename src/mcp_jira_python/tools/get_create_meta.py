@@ -167,5 +167,3 @@ class GetCreateMetaTool(BaseTool):
             raise
         except Exception as e:
             raise Exception(f"Failed to get create metadata: {e!s}") from e
-
-

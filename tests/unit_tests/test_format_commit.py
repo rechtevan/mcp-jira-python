@@ -148,5 +148,3 @@ class TestFormatCommit:
         assert "issueKey" in definition.inputSchema["properties"]
         assert "message" in definition.inputSchema["properties"]
         assert "type" in definition.inputSchema["properties"]
-
-

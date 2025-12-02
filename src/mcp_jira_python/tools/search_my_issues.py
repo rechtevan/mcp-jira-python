@@ -140,5 +140,3 @@ class SearchMyIssuesTool(BaseTool):
 
         except Exception as e:
             raise Exception(f"Failed to search issues: {e!s}") from e
-
-

@@ -134,5 +134,3 @@ class FormatCommitTool(BaseTool):
                 text=json.dumps(result, indent=2, ensure_ascii=False),
             )
         ]
-
-

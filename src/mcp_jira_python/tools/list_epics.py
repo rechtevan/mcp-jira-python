@@ -110,5 +110,3 @@ class ListEpicsTool(BaseTool):
 
         except Exception as e:
             raise Exception(f"Failed to list epics: {e!s}") from e
-
-

@@ -182,5 +182,3 @@ class TestFieldMapper:
 
         # Now it should have been called
         mock_jira.fields.assert_called_once()
-
-
