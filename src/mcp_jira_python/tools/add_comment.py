@@ -1,6 +1,9 @@
-from typing import List
-from mcp.types import Tool, TextContent
+from typing import Any
+
+from mcp.types import TextContent, Tool
+
 from .base import BaseTool
+
 
 class AddCommentTool(BaseTool):
     def get_tool_definition(self) -> Tool:
@@ -17,29 +20,31 @@ Note: Only use these Jira-specific emoticons. Unicode emojis will not display co
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "issueKey": {
-                        "type": "string",
-                        "description": "Key of the issue to comment on"
-                    },
+                    "issueKey": {"type": "string", "description": "Key of the issue to comment on"},
                     "comment": {
                         "type": "string",
-                        "description": "Comment text content. Supports Jira emoticons like :) (y) (i) - see tool description for full list"
-                    }
+                        "description": (
+                            "Comment text content. Supports Jira emoticons like :) (y) (i) "
+                            "- see tool description for full list"
+                        ),
+                    },
                 },
-                "required": ["issueKey", "comment"]
-            }
+                "required": ["issueKey", "comment"],
+            },
         )
 
-    async def execute(self, arguments: dict) -> List[TextContent]:
+    async def execute(self, arguments: dict[str, Any]) -> list[TextContent]:
         issue_key = arguments.get("issueKey")
         comment_text = arguments.get("comment")
-        
+
         if not issue_key or not comment_text:
             raise ValueError("issueKey and comment are required")
-            
+
         comment = self.jira.add_comment(issue_key, comment_text)
-        
-        return [TextContent(
-            type="text",
-            text=f'{{"message": "Comment added successfully", "id": "{comment.id}"}}'
-        )]
+
+        return [
+            TextContent(
+                type="text",
+                text=f'{{"message": "Comment added successfully", "id": "{comment.id}"}}',
+            )
+        ]

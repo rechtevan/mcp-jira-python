@@ -1,13 +1,15 @@
 import asyncio
 import os
 from pathlib import Path
-from mcp.server.models import InitializationOptions
-import mcp.types as types
-from mcp.server import NotificationOptions, Server
+from typing import Any
+
 import mcp.server.stdio
-from jira import JIRA
 from dotenv import load_dotenv
-#from tools import get_all_tools, get_tool  # Changed from relative import
+from jira import JIRA
+from mcp import types
+from mcp.server import NotificationOptions, Server
+from mcp.server.models import InitializationOptions
+
 from mcp_jira_python.tools import get_all_tools, get_tool
 
 # Load environment from .env file (if present)
@@ -20,7 +22,7 @@ load_dotenv(env_file)
 
 server = Server("jira-api")
 
-# Jira client setup 
+# Jira client setup
 # Required: JIRA_HOST (can be just hostname or full URL)
 # Auth option 1 (Jira Cloud): JIRA_EMAIL + JIRA_API_TOKEN
 # Auth option 2 (Jira Server/DC with PAT): JIRA_BEARER_TOKEN
@@ -41,16 +43,10 @@ else:
 # Initialize Jira client based on available auth method
 if JIRA_BEARER_TOKEN:
     # Jira Server/Data Center with Personal Access Token (PAT)
-    jira_client = JIRA(
-        server=jira_server_url,
-        token_auth=JIRA_BEARER_TOKEN
-    )
+    jira_client = JIRA(server=jira_server_url, token_auth=JIRA_BEARER_TOKEN)
 elif JIRA_EMAIL and JIRA_API_TOKEN:
     # Jira Cloud with email + API token
-    jira_client = JIRA(
-        server=jira_server_url,
-        basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN)
-    )
+    jira_client = JIRA(server=jira_server_url, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN))
 else:
     raise ValueError(
         "Missing authentication credentials. Provide either:\n"
@@ -58,24 +54,23 @@ else:
         "  - JIRA_EMAIL + JIRA_API_TOKEN (for Jira Cloud)"
     )
 
+
 @server.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
     return get_all_tools()
 
+
 @server.call_tool()
-async def handle_call_tool(name: str, arguments: dict | None) -> list[types.TextContent]:
+async def handle_call_tool(name: str, arguments: dict[str, Any] | None) -> list[types.TextContent]:
     try:
         tool = get_tool(name)
         tool.jira = jira_client
         return await tool.execute(arguments or {})
     except Exception as e:
-        return [types.TextContent(
-            type="text", 
-            text=f"Operation failed: {str(e)}",
-            isError=True
-        )]
+        return [types.TextContent(type="text", text=f"Error: {e!s}")]
 
-async def main():
+
+async def main() -> None:
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,
@@ -89,6 +84,7 @@ async def main():
                 ),
             ),
         )
+
 
 if __name__ == "__main__":
     asyncio.run(main())

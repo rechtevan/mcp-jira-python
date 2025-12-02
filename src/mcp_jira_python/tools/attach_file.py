@@ -1,7 +1,10 @@
-import os
-from typing import List
-from mcp.types import Tool, TextContent
+from pathlib import Path
+from typing import Any
+
+from mcp.types import TextContent, Tool
+
 from .base import BaseTool
+
 
 class AttachFileTool(BaseTool):
     def get_tool_definition(self) -> Tool:
@@ -13,46 +16,49 @@ class AttachFileTool(BaseTool):
                 "properties": {
                     "issueKey": {
                         "type": "string",
-                        "description": "Key of the issue to attach to"
+                        "description": "Key of the issue to attach to",
                     },
                     "filename": {
                         "type": "string",
-                        "description": "Name of the attachment file in issue"
+                        "description": "Name of the attachment file in issue",
                     },
                     "filepath": {
                         "type": "string",
-                        "description": "Filepath is file to attach"
-                    }
+                        "description": "Filepath is file to attach",
+                    },
                 },
-                "required": ["issueKey", "filename", "filepath"]
-            }
+                "required": ["issueKey", "filename", "filepath"],
+            },
         )
 
-    async def execute(self, arguments: dict) -> List[TextContent]:
+    async def execute(self, arguments: dict[str, Any]) -> list[TextContent]:
         issue_key = arguments.get("issueKey")
         filename = arguments.get("filename")
-        filepath = arguments.get("filepath")
-        
-        if not all([issue_key, filename, filepath]):
+        filepath_str = arguments.get("filepath")
+
+        if not all([issue_key, filename, filepath_str]):
             raise ValueError("issueKey, filename, and filepath are required")
-            
+
+        filepath = Path(filepath_str)
+
         try:
             # Check if file exists
-            if not os.path.exists(filepath):
+            if not filepath.exists():
                 raise ValueError(f"File not found: {filepath}")
-                
+
             # Check file size (10MB limit)
-            if os.path.getsize(filepath) > 10 * 1024 * 1024:
+            if filepath.stat().st_size > 10 * 1024 * 1024:
                 raise ValueError("Attachment too large (max 10MB)")
-            
+
             # Use add_attachment which is the correct method in the JIRA API
-            # This does not involve base64 encoding/decoding when used with file paths
-            self.jira.add_attachment(issue_key, filepath, filename=filename)
-            
-            return [TextContent(
-                type="text",
-                text=f'{{"message": "File attached successfully", "filename": "{filename}"}}'
-            )]
-            
+            self.jira.add_attachment(issue_key, str(filepath), filename=filename)
+
+            return [
+                TextContent(
+                    type="text",
+                    text=f'{{"message": "File attached successfully", "filename": "{filename}"}}',
+                )
+            ]
+
         except Exception as e:
-            raise Exception(f"Failed to attach file: {str(e)}")
+            raise Exception(f"Failed to attach file: {e!s}") from e
