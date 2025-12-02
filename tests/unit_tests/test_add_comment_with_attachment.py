@@ -85,3 +85,78 @@ class TestAddCommentWithAttachmentTool:
         assert "comment" in definition.inputSchema["properties"]
         assert "filename" in definition.inputSchema["properties"]
         assert "filepath" in definition.inputSchema["properties"]
+
+    def test_execute_missing_required_fields(self, tool: AddCommentWithAttachmentTool) -> None:
+        """Test error when required fields are missing."""
+        with pytest.raises(
+            ValueError, match="issueKey, filename, filepath, and comment are required"
+        ):
+            asyncio.run(tool.execute({"issueKey": "TEST-123"}))
+
+    def test_execute_file_not_found(
+        self, tool: AddCommentWithAttachmentTool, mock_jira: Mock
+    ) -> None:
+        """Test error when file does not exist."""
+        with pytest.raises(Exception, match="File not found"):
+            asyncio.run(
+                tool.execute(
+                    {
+                        "issueKey": "TEST-123",
+                        "comment": "Test comment",
+                        "filename": "test.txt",
+                        "filepath": "/nonexistent/path/file.txt",
+                    }
+                )
+            )
+
+    def test_execute_file_too_large(
+        self, tool: AddCommentWithAttachmentTool, mock_jira: Mock
+    ) -> None:
+        """Test error when file exceeds size limit."""
+        with tempfile.NamedTemporaryFile(mode="wb", delete=False, suffix=".txt") as tmp:
+            # Write more than 10MB
+            tmp.write(b"x" * (11 * 1024 * 1024))
+            tmp_path = Path(tmp.name)
+
+        try:
+            with pytest.raises(Exception, match="Attachment too large"):
+                asyncio.run(
+                    tool.execute(
+                        {
+                            "issueKey": "TEST-123",
+                            "comment": "Test comment",
+                            "filename": "large.txt",
+                            "filepath": str(tmp_path),
+                        }
+                    )
+                )
+        finally:
+            if tmp_path.exists():
+                tmp_path.unlink()
+
+    def test_execute_attachment_error_handled(
+        self, tool: AddCommentWithAttachmentTool, mock_jira: Mock
+    ) -> None:
+        """Test that attachment errors are handled gracefully."""
+        mock_jira.add_attachment.side_effect = Exception("Upload failed")
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp:
+            tmp.write("Test content")
+            tmp_path = Path(tmp.name)
+
+        try:
+            result = asyncio.run(
+                tool.execute(
+                    {
+                        "issueKey": "TEST-123",
+                        "comment": "Test comment",
+                        "filename": "test.txt",
+                        "filepath": str(tmp_path),
+                    }
+                )
+            )
+            # Should still succeed since comment was added
+            assert "Comment and attachment added successfully" in result[0].text
+        finally:
+            if tmp_path.exists():
+                tmp_path.unlink()
