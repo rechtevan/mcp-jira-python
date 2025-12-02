@@ -23,6 +23,7 @@ from .list_link_types import ListLinkTypesTool
 from .list_projects import ListProjectsTool
 from .search_issues import SearchIssuesTool
 from .search_my_issues import SearchMyIssuesTool
+from .suggest_issue_fields import SuggestIssueFieldsTool
 from .transition_issue import TransitionIssueTool
 from .update_issue import UpdateIssueTool
 
@@ -51,6 +52,7 @@ _TOOLS: dict[str, BaseTool] = {
     "list_projects": ListProjectsTool(),
     "search_my_issues": SearchMyIssuesTool(),
     "format_commit": FormatCommitTool(),
+    "suggest_issue_fields": SuggestIssueFieldsTool(),
 }
 
 

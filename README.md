@@ -1,180 +1,176 @@
 # MCP JIRA Python 🚀
 
-A Python implementation of a MCP server for JIRA integration. MCP is a communication protocol designed to provide tools to your AI and keep your data secure (and local if you like). The server runs on the same computer as your AI application and the Claude Desktop is the first application to run MCP Servers (and is considered a client. See the examples folder for a simple python MCP client).
+[![CI](https://github.com/rechtevan/mcp-jira-python/actions/workflows/test.yml/badge.svg)](https://github.com/rechtevan/mcp-jira-python/actions/workflows/test.yml)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![mypy](https://img.shields.io/badge/type%20checked-mypy-blue)](https://mypy-lang.org/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+A Python implementation of a MCP server for JIRA integration. MCP is a communication protocol designed to provide tools to your AI and keep your data secure (and local if you like). The server runs on the same computer as your AI application.
+
+**Supports:** Jira Cloud and Jira Server/Data Center (v8.14+)
 
 ## Installation
 
 ```bash
-# Install the server locally
-git clone https://github.com/kallows/mcp-jira-python.git 
+git clone https://github.com/rechtevan/mcp-jira-python.git
+cd mcp-jira-python
+pip install -e ".[dev]"
 ```
 
-## Tools Available
+## Tools Available (25 tools)
 
-This MCP server provides the following JIRA integration tools:
+### Issue Management
+| Tool | Description |
+|------|-------------|
+| `create_jira_issue` | Create issues with standard and custom fields |
+| `get_issue` | Get issue details including custom fields with friendly names |
+| `update_issue` | Update issues with custom field support |
+| `delete_issue` | Delete an issue or subtask |
+| `search_issues` | Search using JQL |
+| `search_my_issues` | Find your assigned/reported issues |
 
-- `delete_issue`: Delete a Jira issue or subtask using its issue key
-- `create_jira_issue`: Create a new Jira issue with customizable fields including summary, description, type, priority, and assignee
-- `get_issue`: Retrieve complete issue details including comments and attachments for a given issue key
-- `get_issue_attachment`: Download an attachment from a Jira issue to a local file
-- `create_issue_link`: Create relationships between issues (e.g., "blocks", "is blocked by", etc.)
-- `update_issue`: Update existing issues with new values for fields like summary, description, status, priority, or assignee
-- `get_user`: Look up a user's account ID using their email address
-- `list_fields`: Get a list of all available JIRA fields and their properties
-- `list_issue_types`: Retrieve all available issue types in your JIRA instance
-- `list_link_types`: Get all possible relationship types for issue linking
-- `search_issues`: Search for issues using JQL (JIRA Query Language) within a specific project
-- `add_comment`: Add a text comment to an existing issue
-- `add_comment_with_attachment`: Add a comment to an issue with an attached file
-- `attach_file`: Add a file attachment to an existing issue
-- `attach_content`: Create and attach content directly to a Jira issue (allows creating attachments from any text or data content)
+### Workflow & Transitions
+| Tool | Description |
+|------|-------------|
+| `get_transitions` | Get available workflow transitions |
+| `transition_issue` | Move issue through workflow states |
 
-## Claude Desktop Configuration
-This requires you update claude_desktop_config.json. The file's location varies depending on Apple, Windows, or Linux.
- 
-### Windows
-Note: location of claude_desktop_config.json in Windows is:
+### Epic & Hierarchy
+| Tool | Description |
+|------|-------------|
+| `list_epics` | List epics in a project |
+| `get_epic_issues` | Get issues under an epic with progress |
+
+### Comments & Attachments
+| Tool | Description |
+|------|-------------|
+| `add_comment` | Add a comment to an issue |
+| `add_comment_with_attachment` | Add comment with file attachment |
+| `attach_file` | Attach a file to an issue |
+| `attach_content` | Create and attach content directly |
+| `get_issue_attachment` | Download an attachment |
+
+### Project & Field Discovery
+| Tool | Description |
+|------|-------------|
+| `list_projects` | List accessible projects |
+| `list_fields` | Get all available fields |
+| `list_issue_types` | Get available issue types |
+| `list_link_types` | Get issue link types |
+| `get_field_mapping` | Discover custom fields by name |
+| `get_create_meta` | Get required fields for issue creation |
+
+### Utilities
+| Tool | Description |
+|------|-------------|
+| `get_user` | Look up user by email |
+| `create_issue_link` | Link issues together |
+| `format_commit` | Format git commit with Jira reference |
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env.jira` file (or set environment variables):
+
+```bash
+# Jira Cloud
+JIRA_HOST=your-domain.atlassian.net
+JIRA_EMAIL=your-email@example.com
+JIRA_API_TOKEN=your-api-token
+
+# OR Jira Server/Data Center (v8.14+)
+JIRA_HOST=jira.your-company.com
+JIRA_BEARER_TOKEN=your-personal-access-token
 ```
-%AppData%\\Claude\\claude_desktop_config.json
-```
-This will resolve (usually) to: 
-C:\\Users\\YOURUSERNAME\\AppData\\Roaming\\Claude
 
-Below is the configuration block to add to claude_desktop_config.json.
-With Windows we always use full paths. You will update "command", set your directory path, and add your JIRA env settings
-<pre>
+### Claude Desktop Configuration
+
+**Windows** (`%AppData%\Claude\claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
     "jira-api": {
-      "command": "C:\\\\Users\\\\YOURUSERNAME\\\\.local\\\\bin\\\\uv.exe",
+      "command": "C:\\Users\\USERNAME\\.local\\bin\\uv.exe",
       "args": [
         "--directory",
-        "D:\\\\mcp\\\\mcp-jira-python",
+        "D:\\path\\to\\mcp-jira-python",
         "run",
         "-m",
         "mcp_jira_python.server"
       ],
       "env": {
-        "JIRA_HOST": "YOURNAME.atlassian.net",
-        "JIRA_EMAIL": "yourname@example.com",
-        "JIRA_API_TOKEN": "YOURJIRATOKEN"
-      }      
+        "JIRA_HOST": "your-domain.atlassian.net",
+        "JIRA_EMAIL": "your@email.com",
+        "JIRA_API_TOKEN": "your-token"
+      }
     }
-</pre>
-#### ☠️WARNING - you MUST close Claude Desktop AND kill all Claude processes to enable the updated claude_desktop_config.json!😬
+  }
+}
+```
 
-### Mac and Linux
-Update the filepath to mcp-jira-python and fill in your JIRA env values:
-<pre>
-    "mcp-jira-python": {
+**macOS/Linux** (`~/.config/claude/claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "jira-api": {
       "command": "uv",
       "args": [
         "run",
-        "--directory", "/your/filepath/mcp-jira-python",
+        "--directory", "/path/to/mcp-jira-python",
         "-m", "mcp_jira_python.server"
       ],
       "env": {
-        "JIRA_HOST": "your_org.atlassian.net",
-        "JIRA_EMAIL": "you@your_org.com",
-        "JIRA_API_TOKEN": "your_api_token"
-      }      
+        "JIRA_HOST": "your-domain.atlassian.net",
+        "JIRA_EMAIL": "your@email.com",
+        "JIRA_API_TOKEN": "your-token"
+      }
     }
-</pre>
+  }
+}
+```
 
-#### Note:
-You must restart Claude Desktop after saving changes to claude_desktop_config.json.
+> ⚠️ **Note:** Restart Claude Desktop after configuration changes.
 
-## Running MCP JIRA Python Tools
-These MCP Tools are listed under jira-api server. You can see the listing by clicking on the tiny hammer in the lower right corner of the Claude Desktop text entry box. Please verify that the jira-api tools are available in the list. To 'run' a tool, just ask Claude specifically to do a Jira task. Notably, Claude may not see the tools at first and has to be nudged. In some cases, he will refuse to use tools. Updating the system prompt is recommended.
+### Other MCP Clients
 
-## Running Tests    
+This server works with any MCP client (Cursor, Windsurf, etc.) that supports stdio transport.
 
-The test suite provides comprehensive coverage of the MCP JIRA server functionality. To run tests, you need to set up environment variables for integration tests:
+## Running Tests
 
 ```bash
-export JIRA_HOST="your-domain.atlassian.net"
-export JIRA_EMAIL="your-email@example.com"
-export JIRA_API_TOKEN="your-api-token"
-export JIRA_PROJECT_KEY="TEST"  # Project key for test issues
+# Unit tests (no Jira connection needed)
+pytest tests/unit_tests/ -v
+
+# With coverage
+pytest tests/unit_tests/ --cov=src/mcp_jira_python --cov-report=term
+
+# Integration tests (requires Jira credentials)
+pytest tests/integration_tests/ -v
 ```
 
-Run the full test suite:
+## Development
+
 ```bash
-python -m unittest discover tests
+# Install dev dependencies
+pip install -e ".[dev]"
+
+# Run linting
+ruff check src/ tests/
+ruff format src/ tests/
+
+# Run type checking
+mypy src/mcp_jira_python
+
+# Run security scan
+bandit -r src/ -c pyproject.toml
+
+# Pre-commit hooks
+pre-commit install
+pre-commit run --all-files
 ```
 
-Run specific test categories:
-```bash
-# Integration tests
-python -m unittest tests/test_jira_mcp_integration.py
+## License
 
-# Unit tests for individual tools
-python -m unittest discover tests/unit_tests
-
-# Endpoint-specific tests
-python -m unittest discover tests/endpoint_tests
-```
-
-Generate test coverage report:
-```bash
-python -m coverage run -m unittest discover tests
-python -m coverage report
-```
-
-## Project Structure
-
-```
-mcp-jira-python/
-├── README.md
-├── LICENSE
-├── pyproject.toml
-├── uv.lock
-├── examples/
-│   └── client.py
-├── src/
-│   └── mcp_jira_python/
-│       ├── __init__.py
-│       ├── server.py
-│       └── tools/
-│           ├── __init__.py
-│           ├── base.py
-│           ├── add_comment.py
-│           ├── add_comment_with_attachment.py
-│           ├── attach_content.py
-│           ├── attach_file.py
-│           ├── create_issue.py
-│           ├── create_issue_link.py
-│           ├── delete_issue.py
-│           ├── get_issue.py
-│           ├── get_issue_attachment.py
-│           ├── get_user.py
-│           ├── list_fields.py
-│           ├── list_issue_types.py
-│           ├── list_link_types.py
-│           ├── search_issues.py
-│           └── update_issue.py
-└── tests/
-    ├── __init__.py
-    ├── README.md
-    ├── conftest.py
-    ├── test_jira_connection.py
-    ├── test_jira_endpoints.py
-    ├── test_jira_mcp_integration.py
-    ├── test_jira_mcp_system.py
-    ├── test_integration.py
-    └── test_unit.py
-    ├── endpoint_tests/
-    │   ├── test_add_comment.py
-    │   ├── test_create_issue.py
-    │   ├── test_get_issue.py
-    │   └── test_update_issue.py
-    └── unit_tests/
-        ├── __init__.py
-        ├── test_base.py
-        ├── test_add_comment.py
-        ├── test_add_comment_with_attachment.py
-        ├── test_create_issue.py
-        ├── test_create_issue_link.py
-        ├── test_delete_issue.py
-        ├── test_get_issue.py
-        ├── test_search_issues.py
-        └── test_update_issue.py
-```
+Apache License 2.0 - see [LICENSE](LICENSE) for details.
