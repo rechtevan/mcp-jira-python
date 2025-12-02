@@ -1,3 +1,9 @@
+"""MCP tools for Jira integration.
+
+This module provides all available tools for the Jira MCP server.
+Each tool is a class that implements the BaseTool interface.
+"""
+
 from mcp.types import Tool
 
 from .add_comment import AddCommentTool
@@ -59,10 +65,26 @@ _TOOLS: dict[str, BaseTool] = {
 
 
 def get_all_tools() -> list[Tool]:
+    """Get tool definitions for all registered tools.
+
+    Returns:
+        List of Tool definitions for MCP server registration.
+    """
     return [tool.get_tool_definition() for tool in _TOOLS.values()]
 
 
 def get_tool(name: str) -> BaseTool:
+    """Get a tool instance by name.
+
+    Args:
+        name: The tool name (e.g., 'create_jira_issue', 'get_issue').
+
+    Returns:
+        The tool instance.
+
+    Raises:
+        ValueError: If the tool name is not found.
+    """
     if name not in _TOOLS:
         raise ValueError(f"Unknown tool: {name}")
     return _TOOLS[name]
