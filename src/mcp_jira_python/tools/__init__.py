@@ -11,11 +11,13 @@ from .delete_issue import DeleteIssueTool
 from .get_field_mapping import GetFieldMappingTool
 from .get_issue import GetIssueTool
 from .get_issue_attachment import GetIssueAttachmentTool
+from .get_transitions import GetTransitionsTool
 from .get_user import GetUserTool
 from .list_fields import ListFieldsTool
 from .list_issue_types import ListIssueTypesTool
 from .list_link_types import ListLinkTypesTool
 from .search_issues import SearchIssuesTool
+from .transition_issue import TransitionIssueTool
 from .update_issue import UpdateIssueTool
 
 _TOOLS: dict[str, BaseTool] = {
@@ -35,6 +37,8 @@ _TOOLS: dict[str, BaseTool] = {
     "attach_file": AttachFileTool(),
     "attach_content": AttachContentTool(),
     "get_field_mapping": GetFieldMappingTool(),
+    "get_transitions": GetTransitionsTool(),
+    "transition_issue": TransitionIssueTool(),
 }
 
 
