@@ -140,9 +140,108 @@ JIRA_BEARER_TOKEN=your-personal-access-token
 
 > ⚠️ **Note:** Restart Claude Desktop after configuration changes.
 
+### Cursor Configuration
+
+**Windows** (`%USERPROFILE%\.cursor\mcp.json`):
+```json
+{
+  "mcpServers": {
+    "jira-api": {
+      "command": "C:\\path\\to\\mcp-jira-python\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "mcp_jira_python.server"],
+      "cwd": "C:\\path\\to\\mcp-jira-python"
+    }
+  }
+}
+```
+
+**macOS/Linux** (`~/.cursor/mcp.json`):
+```json
+{
+  "mcpServers": {
+    "jira-api": {
+      "command": "/path/to/mcp-jira-python/.venv/bin/python",
+      "args": ["-m", "mcp_jira_python.server"],
+      "cwd": "/path/to/mcp-jira-python"
+    }
+  }
+}
+```
+
+> 💡 **Tip:** Create a `.env.jira` file in the project root with your credentials. The server automatically loads it.
+
+### Windsurf Configuration
+
+Windsurf stores MCP configuration in `~/.codeium/windsurf/mcp_config.json`:
+
+**Windows** (`%USERPROFILE%\.codeium\windsurf\mcp_config.json`):
+```json
+{
+  "mcpServers": {
+    "jira-api": {
+      "command": "C:\\path\\to\\mcp-jira-python\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "mcp_jira_python.server"],
+      "cwd": "C:\\path\\to\\mcp-jira-python"
+    }
+  }
+}
+```
+
+**macOS/Linux** (`~/.codeium/windsurf/mcp_config.json`):
+```json
+{
+  "mcpServers": {
+    "jira-api": {
+      "command": "/path/to/mcp-jira-python/.venv/bin/python",
+      "args": ["-m", "mcp_jira_python.server"],
+      "cwd": "/path/to/mcp-jira-python"
+    }
+  }
+}
+```
+
+### WSL / Remote VM Configuration
+
+When running your IDE on Windows but developing in WSL or a remote VM, use `wsl.exe` or `ssh` as the command wrapper.
+
+**Windows IDE → WSL** (`mcp.json`):
+```json
+{
+  "mcpServers": {
+    "jira-api": {
+      "command": "wsl.exe",
+      "args": [
+        "bash", "-c",
+        "cd /home/username/mcp-jira-python && .venv/bin/python -m mcp_jira_python.server"
+      ]
+    }
+  }
+}
+```
+
+**Windows IDE → Remote VM via SSH** (`mcp.json`):
+```json
+{
+  "mcpServers": {
+    "jira-api": {
+      "command": "ssh",
+      "args": [
+        "user@remote-host",
+        "cd /path/to/mcp-jira-python && .venv/bin/python -m mcp_jira_python.server"
+      ]
+    }
+  }
+}
+```
+
+> ⚠️ **Note:** For SSH, ensure key-based authentication is set up (no password prompts). The `.env.jira` file should exist on the remote system where the server runs.
+
 ### Other MCP Clients
 
-This server works with any MCP client (Cursor, Windsurf, etc.) that supports stdio transport.
+This server works with any MCP client that supports stdio transport. The general pattern is:
+1. Point `command` to the Python interpreter in the virtual environment
+2. Use `args` to run `-m mcp_jira_python.server`
+3. Set `cwd` to the project directory (or use `.env.jira` for credentials)
 
 ## Running Tests
 
