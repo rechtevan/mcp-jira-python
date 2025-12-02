@@ -8,11 +8,13 @@ from .base import BaseTool
 from .create_issue import CreateIssueTool
 from .create_issue_link import CreateIssueLinkTool
 from .delete_issue import DeleteIssueTool
+from .get_epic_issues import GetEpicIssuesTool
 from .get_field_mapping import GetFieldMappingTool
 from .get_issue import GetIssueTool
 from .get_issue_attachment import GetIssueAttachmentTool
 from .get_transitions import GetTransitionsTool
 from .get_user import GetUserTool
+from .list_epics import ListEpicsTool
 from .list_fields import ListFieldsTool
 from .list_issue_types import ListIssueTypesTool
 from .list_link_types import ListLinkTypesTool
@@ -39,6 +41,8 @@ _TOOLS: dict[str, BaseTool] = {
     "get_field_mapping": GetFieldMappingTool(),
     "get_transitions": GetTransitionsTool(),
     "transition_issue": TransitionIssueTool(),
+    "list_epics": ListEpicsTool(),
+    "get_epic_issues": GetEpicIssuesTool(),
 }
 
 
