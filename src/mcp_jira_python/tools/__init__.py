@@ -4,6 +4,7 @@ from .add_comment import AddCommentTool
 from .add_comment_with_attachment import AddCommentWithAttachmentTool
 from .attach_content import AttachContentTool
 from .attach_file import AttachFileTool
+from .audit_issue import AuditIssueTool
 from .base import BaseTool
 from .create_issue import CreateIssueTool
 from .create_issue_link import CreateIssueLinkTool
@@ -53,6 +54,7 @@ _TOOLS: dict[str, BaseTool] = {
     "search_my_issues": SearchMyIssuesTool(),
     "format_commit": FormatCommitTool(),
     "suggest_issue_fields": SuggestIssueFieldsTool(),
+    "audit_issue": AuditIssueTool(),
 }
 
 
