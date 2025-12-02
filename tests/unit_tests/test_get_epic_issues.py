@@ -140,3 +140,4 @@ class TestGetEpicIssues:
         assert "epicKey" in definition.inputSchema["properties"]
         assert "status" in definition.inputSchema["properties"]
 
+

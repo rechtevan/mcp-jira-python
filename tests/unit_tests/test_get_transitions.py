@@ -123,3 +123,4 @@ class TestGetTransitions:
         assert "issueKey" in definition.inputSchema["properties"]
         assert "issueKey" in definition.inputSchema["required"]
 
+
