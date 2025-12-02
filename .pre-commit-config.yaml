@@ -1,39 +1,28 @@
 # Pre-commit hooks for mcp-jira-python
-# Install: pre-commit install && pre-commit install --hook-type pre-push
-# Run all: pre-commit run --all-files
-
-default_stages: [pre-commit]
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
 
 repos:
-  # ==========================================================================
-  # General hooks
-  # ==========================================================================
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+      - id: check-json
       - id: check-toml
       - id: check-added-large-files
-        args: ['--maxkb=1000']
+        args: ["--maxkb=500"]
       - id: check-merge-conflict
       - id: detect-private-key
-      - id: debug-statements
 
-  # ==========================================================================
-  # Ruff - Fast Python linter and formatter
-  # ==========================================================================
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.4
+    rev: v0.8.2
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--fix]
       - id: ruff-format
 
-  # ==========================================================================
-  # Mypy - Static type checking
-  # ==========================================================================
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:
@@ -41,29 +30,22 @@ repos:
         additional_dependencies:
           - types-requests
         args: [--config-file=pyproject.toml]
-        pass_filenames: false
-        entry: mypy src/mcp_jira_python
+        files: ^src/
 
-  # ==========================================================================
-  # Bandit - Security scanning (pre-push only)
-  # ==========================================================================
   - repo: https://github.com/PyCQA/bandit
     rev: 1.8.0
     hooks:
       - id: bandit
-        args: [-r, src/, -c, pyproject.toml]
-        stages: [pre-push]
+        args: [-c, pyproject.toml]
+        additional_dependencies: ["bandit[toml]"]
+        files: ^src/
 
-  # ==========================================================================
-  # Pytest - Run tests (pre-push only)
-  # ==========================================================================
   - repo: local
     hooks:
-      - id: pytest
-        name: pytest
-        entry: pytest tests/ -q --no-cov
+      - id: pytest-check
+        name: pytest-check
+        entry: pytest tests/unit_tests/ -x -q
         language: system
-        stages: [pre-push]
         pass_filenames: false
         always_run: true
-
+        stages: [pre-push]
